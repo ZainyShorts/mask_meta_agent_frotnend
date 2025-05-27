@@ -83,6 +83,7 @@ const AddtMenuSizeForm = ({ open, setOpen, data, onTypeAdded, onCreateSize }: Ad
       description: data?.description,
       business: data?.business,
       menu: data?.menu,
+      size: data?.size,
       type: data?.type
     }
 
