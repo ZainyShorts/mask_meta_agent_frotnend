@@ -629,10 +629,7 @@ const AddSize = ({ id, isCreated, onCreateSize }: PreviewToppingsProps) => {
     if (selectedItem) {
       setValue("business", Number(selectedItem.business), { shouldValidate: true })
       setValue("type", selectedItem?.type?.id, { shouldValidate: true })
-    } else {
-      setValue("business", undefined, { shouldValidate: true })
-      setValue("type", undefined, { shouldValidate: true })
-    }
+    } 
   }
 
   useEffect(() => {
