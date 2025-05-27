@@ -355,9 +355,9 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
                       <CustomTextField
                         select
                         fullWidth
-                        label='Select Food Type *'
+                        label='Select Type *'
                         {...register('type', {
-                          required: 'Food Type is required'
+                          required: 'Type is required'
                         })}
                         error={!!errors.business}
                         helperText={errors.business?.message}
@@ -377,7 +377,7 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
                           ))
                         ) : (
                           <MenuItem disabled value=''>
-                            No food type available
+                            No type available
                           </MenuItem>
                         )}
                       </CustomTextField>

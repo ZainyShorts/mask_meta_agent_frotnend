@@ -28,6 +28,7 @@ export interface SizeDataTypeWithoutId {
   additional_price: string
   menu: number
   type: number
+  size: string
   business: number
   active?: boolean
   title?: string

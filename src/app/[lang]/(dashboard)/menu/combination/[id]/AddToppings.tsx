@@ -238,10 +238,10 @@ const AddToppings = ({ id, isCreated, onCreateTopping }: PreviewToppingsProps) =
                     select
                     fullWidth
                     id='business'
-                    label='Select Food Type *'
+                    label='Select Type *'
                     value={watch('type') || 0}
                     {...register('type', {
-                      required: 'Food Type is required',
+                      required: 'Type is required',
                       validate: value => (value !== 0 ? true : 'Food Type is required')
                     })}
                     error={!!errors.type}
@@ -249,7 +249,7 @@ const AddToppings = ({ id, isCreated, onCreateTopping }: PreviewToppingsProps) =
                     style={{ flex: 1 }} // Takes up remaining space
                   >
                     <MenuItem key='Select Food Type' value={0}>
-                      Select Food Type
+                      Select Type
                     </MenuItem>
                     {FoodTypeData &&
                       FoodTypeData?.map(food => (
@@ -282,7 +282,7 @@ const AddToppings = ({ id, isCreated, onCreateTopping }: PreviewToppingsProps) =
             </Grid>
           </Grid>
         </form>
-        <Toaster />
+        {/* <Toaster /> */}
       </Card>
     </>
   )

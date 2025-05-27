@@ -194,7 +194,7 @@ const ToppingListTable = ({ isCreated, id }: PreviewProps) => {
 
     deleteToppings(id)
       .then(res => {
-        toast.success('Topping deleted successfully')
+        toast.error('Topping deleted successfully')
         setDeleteToppingOpen(prev => !prev)
       })
       .catch(error => {
@@ -275,7 +275,7 @@ const ToppingListTable = ({ isCreated, id }: PreviewProps) => {
       }),
 
       columnHelper.accessor('type', {
-        header: 'Food Type',
+        header: 'Type',
         cell: ({ row }) => (
           <div className='flex items-center gap-4'>
             <div className='flex flex-col'>

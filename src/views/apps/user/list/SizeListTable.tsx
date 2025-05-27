@@ -161,7 +161,7 @@ const SizeListTable = ({ isCreated, id }: PreviewProps) => {
 
     deleteMenuSize(id)
       .then(res => {
-        toast.success('Menu Size deleted successfully')
+        toast.error('Menu Size deleted successfully')
         setMenuSizeFlag(prev => !prev)
       })
       .catch(error => {
@@ -250,6 +250,16 @@ const SizeListTable = ({ isCreated, id }: PreviewProps) => {
           </Typography>
         )
       }),
+
+      columnHelper.accessor('additional_price', {
+        header: 'Size',
+        cell: ({ row }) => (
+          <Typography className='capitalize' color='text.primary'>
+            {row.original.size}
+          </Typography>
+        )
+      }),
+
       columnHelper.accessor('menu', {
         header: 'Catalouge',
         cell: ({ row }) => (

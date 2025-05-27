@@ -163,7 +163,7 @@ const AddType = ({ open, setOpen, data, onTypeAdded }: TypeInfoProps) => {
           </Button>
         </DialogActions>
       </form>
-      <Toaster />
+      {/* <Toaster /> */}
     </Dialog>
   )
 }

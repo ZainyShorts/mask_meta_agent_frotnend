@@ -215,7 +215,7 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
 
     deleteMenu(id)
       .then(res => {
-        toast.success('Menu deleted successfully')
+        toast.error('Menu deleted successfully')
         setDeleteMenuOpen(prev => !prev)
       })
       .catch(error => {

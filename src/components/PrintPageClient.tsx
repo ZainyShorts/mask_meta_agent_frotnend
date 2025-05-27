@@ -94,7 +94,7 @@ const PrintPageClient: React.FC<PrintPageProps> = ({ id }) => {
             {orderCreatedDate ? convertToPakistanTimePlusOneHour(orderCreatedDate) : 'No date available'}
           </h3>
 
-          <h3>Food Types</h3>
+          <h3>Types</h3>
         </div>
 
         <div style={{ marginTop: '10px', textAlign: 'start' }}>
