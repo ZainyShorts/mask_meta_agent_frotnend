@@ -3,6 +3,7 @@ export interface SizeDataType {
   name: string
   description: string
   additional_price: string
+  size: string
   menu: SizeMenuType
   type: number
   business: number
