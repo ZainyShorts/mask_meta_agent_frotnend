@@ -52,6 +52,7 @@ import { ToppingDataTypeWithObjects } from '@/api/interface/toppingInterface'
 import EditToppingInfo from '@/components/dialogs/edit-topping-info'
 import { BusinessType } from '@/types/apps/businessTypes'
 import { getAllBusiness } from '@/api/business'
+import ConfirmationModal from '@/components/dialogs/confirm-modal'
 
 // Extend react-table with custom filter functions
 declare module '@tanstack/table-core' {
@@ -136,6 +137,10 @@ const ToppingListTable = ({ isCreated, id }: PreviewProps) => {
   const [businessId, setBusinessId] = useState<number>()
   const [selectedBusinessId, setSelectedBusinessId] = useState<string>(id)
 
+  //confirmation modal for delete
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
+
   const fetchToppings = async () => {
     try {
       const response = await getToppingsByBusinessId(selectedBusinessId)
@@ -189,8 +194,7 @@ const ToppingListTable = ({ isCreated, id }: PreviewProps) => {
   }
 
   // Handler for deleting a menu
-  const handleDeleteTopping = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
+  const handleDeleteTopping = (id: number) => {
 
     deleteToppings(id)
       .then(res => {
@@ -301,7 +305,10 @@ const ToppingListTable = ({ isCreated, id }: PreviewProps) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton onClick={e => handleDeleteTopping(row.original.id, e)}>
+            <IconButton onClick={()=>{
+              setSelectedMenuId(row.original.id)
+              setIsModalOpen(true)
+            }}>
               <i className='tabler-trash text-[22px] text-textSecondary' />
             </IconButton>
             <div className='flex gap-4 justify-center'>
@@ -354,6 +361,13 @@ const ToppingListTable = ({ isCreated, id }: PreviewProps) => {
 
   return (
     <>
+      <ConfirmationModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={() => selectedMenuId !== null && handleDeleteTopping(selectedMenuId)}
+                title="Confirm Action"
+                message="Are you sure you want to proceed with this action? This cannot be undone."
+              />
       <Card>
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField

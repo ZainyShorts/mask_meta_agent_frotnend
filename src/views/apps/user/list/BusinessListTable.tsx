@@ -53,6 +53,7 @@ import type { ButtonProps } from '@mui/material/Button'
 import { getLocalizedUrl } from '@/utils/i18n'
 import { Locale } from '@/configs/i18n'
 import AddBusinessForm from '@/components/dialogs/add-business-form'
+import ConfirmationModal from '@/components/dialogs/confirm-modal'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -137,6 +138,10 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
   const [data, setData] = useState<BusinessTypeForFile[]>(tableData || [])
   const [globalFilter, setGlobalFilter] = useState('')
 
+  //confirmation modal for delete
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
+
   const fetchBusiness = async () => {
     try {
       setLoading(true)
@@ -160,8 +165,7 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
     setEditBusinessFlag(true)
   }
 
-  const handleDeleteBusiness = (id: number, e: any) => {
-    e.preventDefault()
+  const handleDeleteBusiness = (id: number) => {
 
     setLoading(true)
 
@@ -298,7 +302,10 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton onClick={e => handleDeleteBusiness(row?.original?.id, e)}>
+            <IconButton onClick={()=>{
+              setSelectedMenuId(row.original.id)
+              setIsModalOpen(true)
+            }}>
               <i className='tabler-trash text-[22px] text-textSecondary' />
             </IconButton>
             <div className='flex gap-4 justify-center'>
@@ -350,6 +357,13 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
 
   return (
     <>
+      <ConfirmationModal
+                          isOpen={isModalOpen}
+                          onClose={() => setIsModalOpen(false)}
+                          onConfirm={() => selectedMenuId !== null && handleDeleteBusiness(selectedMenuId)}
+                          title="Confirm Action"
+                          message="Are you sure you want to proceed with this action? This cannot be undone."
+                        />
       <Card>
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField

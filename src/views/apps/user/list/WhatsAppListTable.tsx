@@ -54,6 +54,7 @@ import EditWhatsAppInfo from '@/components/dialogs/edit-whatsApp-info'
 import { useAuthStore } from '@/store/authStore'
 import { getLocalizedUrl } from '@/utils/i18n'
 import { Locale } from '@/configs/i18n'
+import ConfirmationModal from '@/components/dialogs/confirm-modal'
 declare module '@tanstack/table-core' {
   interface FilterFns {
     fuzzy: FilterFn<unknown>
@@ -128,6 +129,10 @@ const WhatsppAppListTable = ({ tableData }: { tableData?: WhatsAppDataType[] }) 
 
   const [loading, setLoading] = useState<boolean>(false)
 
+  //confirmation modal for delete
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
+
   const fetchWhatsAppFeed = async () => {
     try {
       const response = await GetWhatsApp()
@@ -150,8 +155,7 @@ const WhatsppAppListTable = ({ tableData }: { tableData?: WhatsAppDataType[] }) 
     setEditWhatsAppFlag(true)
   }
 
-  const handleDeleteWhatsApp = (id: number, e: any) => {
-    e.preventDefault()
+  const handleDeleteWhatsApp = (id: number) => {
 
     deleteWhatsApp(id.toString())
       .then(res => {
@@ -272,7 +276,10 @@ const WhatsppAppListTable = ({ tableData }: { tableData?: WhatsAppDataType[] }) 
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton onClick={e => handleDeleteWhatsApp(row?.original?.id, e)}>
+            <IconButton onClick={()=>{
+              setSelectedMenuId(row.original.id)
+              setIsModalOpen(true)
+            }}>
               <i className='tabler-trash text-[22px] text-textSecondary' />
             </IconButton>
 
@@ -325,6 +332,13 @@ const WhatsppAppListTable = ({ tableData }: { tableData?: WhatsAppDataType[] }) 
 
   return (
     <>
+      <ConfirmationModal
+                          isOpen={isModalOpen}
+                          onClose={() => setIsModalOpen(false)}
+                          onConfirm={() => selectedMenuId !== null && handleDeleteWhatsApp(selectedMenuId)}
+                          title="Confirm Action"
+                          message="Are you sure you want to proceed with this action? This cannot be undone."
+                        />
       <Card>
         {loading && <Loader />}
 

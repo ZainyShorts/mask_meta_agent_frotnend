@@ -15,6 +15,7 @@ import type {
 
 export async function registerUser(data: RegisterUserType): Promise<any> {
   try {
+    console.log(data)
     const url = `account/${ENDPOINTS.register}/`
 
     return await POSTNOAUTH(url, data)

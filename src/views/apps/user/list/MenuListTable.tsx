@@ -53,6 +53,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 import { Locale } from '@/configs/i18n'
 import AddtMenuForm from '@/components/dialogs/add-menu-form'
 import ConfirmationDialog from '@/components/ConfirmationDialog'
+import ConfirmationModal from '@/components/dialogs/confirm-modal'
 
 // Extend react-table with custom filter functions
 declare module '@tanstack/table-core' {
@@ -126,7 +127,7 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
   const [loading, setLoading] = useState<boolean>(false)
   const { menuData, menuAction } = useAuthStore()
   const [userBuinsessData, setUserBusinessesData] = useState<BusinessType[]>([])
-
+  
   // State variables for business selection and data filtering
   const [selectedBusiness, setSelectedBusiness] = useState<string | number>('')
   const [selectedBusinessId, setSelectedBusinessId] = useState<string | number>('')
@@ -142,6 +143,11 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
   const [openConfirmation, setOpenConfirmation] = useState(false)
   const [flowCreationFlag, setFlowCreationFlag] = useState(false)
   const [templateCreationFlag, setTemplateCreationFlag] = useState(false)
+
+  //confirmation modal for delete
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
+
 
   const fetchMenues = async () => {
     try {
@@ -210,8 +216,8 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
   }, [selectedBusiness, allData])
 
   // Handler for deleting a menu
-  const handleDeleteMenu = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
+  const handleDeleteMenu = (id: number) => {
+    // e.preventDefault()
 
     deleteMenu(id)
       .then(res => {
@@ -427,7 +433,10 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center gap-3'>
-            <IconButton onClick={e => handleDeleteMenu(row.original.id, e)}>
+            <IconButton onClick={()=>{
+              setSelectedMenuId(row.original.id)
+              setIsModalOpen(true)
+              }}>
               <i className='tabler-trash text-[22px] text-textSecondary' />
             </IconButton>
             <div className='flex gap-4 justify-center'>
@@ -502,6 +511,13 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
 
   return (
     <>
+      <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={() => selectedMenuId !== null && handleDeleteMenu(selectedMenuId)}
+          title="Confirm Action"
+          message="Are you sure you want to proceed with this action? This cannot be undone."
+        />
       <Card>
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField

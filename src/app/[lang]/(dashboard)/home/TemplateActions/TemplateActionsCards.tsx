@@ -311,7 +311,7 @@ const EarningReports: React.FC = () => {
     setIsLoad(false)
     const payload = {
       // name: 'welcome_template',
-      name: `welcome_template_3_${languageCode}`,
+      name: `privacy_policy_check_test_${languageCode}`,
       category: 'MARKETING',
       allow_category_change: true,
       language: 'en',
@@ -323,7 +323,7 @@ const EarningReports: React.FC = () => {
           text: `
           *Privacy Policy & Data Usage*  
 
-Our app makes it easy for you to place orders at your favorite restaurants. To enhance your experience, we collect and store certain data to provide better services.  
+Our app makes it easy for you to place orders. To enhance your experience, we collect and store certain data to provide better services.  
 
 *How We Use Your Data*
 1. *Order Fulfillment* – We store your address and phone number to ensure smooth and accurate delivery of your orders.  
@@ -392,7 +392,7 @@ For any questions or concerns, feel free to contact us.
     setIsLoad(false)
     const payload = {
       // name: 'pending_order_template',
-      name: `pending_order_template_3_${languageCode}`,
+      name: `unprocessed_order_check_${languageCode}`,
       category: 'MARKETING',
       allow_category_change: true,
       language: 'en',
@@ -405,7 +405,7 @@ For any questions or concerns, feel free to contact us.
         // },
         {
           type: 'BODY',
-          text: 'Unprocessed order from your last visit,Do you want to proceed with that? Tap an option below to proceed.'
+          text: 'Unprocessed order from your last visit, Do you want to proceed with that? Tap an option below to proceed.'
         },
         // {
         //   type: 'FOOTER',
@@ -467,10 +467,10 @@ For any questions or concerns, feel free to contact us.
               type: 'QUICK_REPLY',
               text: 'Delivery'
             },
-            // {
-            //   type: 'QUICK_REPLY',
-            //   text: 'Pickup'
-            // }
+            {
+              type: 'QUICK_REPLY',
+              text: 'Pickup'
+            }
           ]
         }
       ],
