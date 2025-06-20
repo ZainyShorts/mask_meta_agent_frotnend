@@ -54,6 +54,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 import { Locale } from '@/configs/i18n'
 import { useTheme } from '@mui/material/styles'
 import AddOutletForm from '@/components/dialogs/add-outlet-form'
+import ConfirmationModal from '@/components/dialogs/confirm-modal'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -131,6 +132,10 @@ const RestoListTable = ({ tableData }: { tableData?: ResturantsType[] }) => {
   const [data, setData] = useState<ResturantsType[]>(tableData || [])
   const [globalFilter, setGlobalFilter] = useState('')
 
+  //confirmation modal for delete
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
+
   const fetchResturants = async () => {
     try {
       const response = await getAllResturants()
@@ -153,9 +158,7 @@ const RestoListTable = ({ tableData }: { tableData?: ResturantsType[] }) => {
     setEditRestoFlag(true)
   }
 
-  const handleDeleteResturant = (id: number, e: any) => {
-    e.preventDefault()
-
+  const handleDeleteResturant = (id: number) => {
     deleteRestaurant(id.toString())
       .then(res => {
         console.log(res, 'Resturant deleted')
@@ -258,7 +261,10 @@ const RestoListTable = ({ tableData }: { tableData?: ResturantsType[] }) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton onClick={e => handleDeleteResturant(row?.original?.id, e)}>
+            <IconButton onClick={()=>{
+              setSelectedMenuId(row.original.id)
+              setIsModalOpen(true)
+            }}>
               <i className='tabler-trash text-[22px] text-textSecondary' />
             </IconButton>
             <div className='flex gap-4 justify-center'>
@@ -310,6 +316,13 @@ const RestoListTable = ({ tableData }: { tableData?: ResturantsType[] }) => {
 
   return (
     <>
+      <ConfirmationModal
+                          isOpen={isModalOpen}
+                          onClose={() => setIsModalOpen(false)}
+                          onConfirm={() => selectedMenuId !== null && handleDeleteResturant(selectedMenuId)}
+                          title="Confirm Action"
+                          message="Are you sure you want to proceed with this action? This cannot be undone."
+                        />
       <Card>
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField

@@ -3,7 +3,7 @@
 // React Imports
 import { useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
-
+import axios from 'axios'
 // Next Imports
 import { useParams, useRouter } from 'next/navigation'
 
@@ -28,6 +28,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 import type { Locale } from '@configs/i18n'
 
 import { useAuthStore } from '@/store/authStore'
+import { ENDPOINTS, getBaseUrl } from '@/api/vars/vars'
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -104,13 +105,20 @@ const UserDropdown = () => {
     setLoading(true)
 
     try {
-      await fetch('/api/logout', { method: 'POST' })
-
-      toast.success('User logged out successfully')
-      router.push(getLocalizedUrl('/login', locale as Locale))
-      localStorage.removeItem('auth_token')
-      clearAuth()
-      setOpen(false)
+      const res = await axios.post(`${getBaseUrl()}account/${ENDPOINTS.logout}/`,{}, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('auth_token')}`, // Add token here
+        'Content-Type': 'application/json',
+      },
+     })
+     console.log(res.data)
+     if(res.status == 200){
+       toast.success('User logged out successfully')
+       router.push(getLocalizedUrl('/login', locale as Locale))
+       localStorage.removeItem('auth_token')
+       clearAuth()
+       setOpen(false)
+      }
     } catch (error) {
       console.error('Logout failed:', error)
     } finally {

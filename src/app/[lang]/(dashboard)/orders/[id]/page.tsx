@@ -8,6 +8,7 @@ type PageProps = {
 }
 
 export default function Page({ params }: PageProps) {
+  
   return (
     <>
       <PrintOrder id={params.id} />

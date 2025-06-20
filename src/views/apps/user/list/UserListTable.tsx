@@ -45,6 +45,7 @@ import EditUserInfo from '@/components/dialogs/edit-user-info'
 import { getLocalizedUrl } from '@/utils/i18n'
 import { Locale } from '@/configs/i18n'
 import AddUserForm from '@/components/dialogs/add-user-form'
+import ConfirmationModal from '@/components/dialogs/confirm-modal'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -122,6 +123,10 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
 
   const [loading, setLoading] = useState<boolean>(false)
 
+  //confirmation modal for delete
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
+
   const fetchUsers = async () => {
     setLoading(true)
 
@@ -145,14 +150,14 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
     setEditUserFlag(true)
   }
 
-  const handleDeleteUser = (id: number, e: any) => {
-    e.preventDefault()
+  const handleDeleteUser = (id: number) => {
 
     deletUser(id.toString())
       .then(res => {
         // console.log(res, 'User deleted')
         toast.success('User  deleted successfully')
         setDeleteUserOpen(true)
+        fetchUsers()
         // router.replace('/home') // Optionally, redirect or refresh the page
       })
       .catch(error => {
@@ -267,7 +272,10 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton onClick={e => handleDeleteUser(row?.original?.id, e)}>
+            <IconButton onClick={()=>{
+              setSelectedMenuId(row.original.id)
+              setIsModalOpen(true)
+            }}>
               <i className='tabler-trash text-[22px] text-textSecondary' />
             </IconButton>
             <div className='flex gap-4 justify-center'>
@@ -319,6 +327,13 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
 
   return (
     <>
+      <ConfirmationModal
+                          isOpen={isModalOpen}
+                          onClose={() => setIsModalOpen(false)}
+                          onConfirm={() => selectedMenuId !== null && handleDeleteUser(selectedMenuId)}
+                          title="Confirm Action"
+                          message="Are you sure you want to proceed with this action? This cannot be undone."
+                        />
       <Card>
         {loading && <Loader />}
 

@@ -137,12 +137,20 @@ const Register = ({ mode }: { mode: SystemMode }) => {
       return
     }
 
+    const user_type = userTypes.find(user => user.type == "businessowner")
+
+    if(!user_type) {
+      toast.error('Type businessowner missing', {
+            duration: 5000 // Duration in milliseconds (5 seconds)
+          })
+      }
+
     setLoading(true)
 
     const submissionData = {
       ...data,
-      status: 'Active'
-      // user_type: 'businessowner'
+      status: 'Active',
+      user_type: user_type!.id
       // image: 'http://localhost:8000/documents/adriotlogo.png'
     }
 
@@ -268,7 +276,7 @@ const Register = ({ mode }: { mode: SystemMode }) => {
                   )
                 }}
               />
-              <CustomTextField
+              {/* <CustomTextField
                 select
                 fullWidth
                 id='user_type'
@@ -283,7 +291,7 @@ const Register = ({ mode }: { mode: SystemMode }) => {
                       {user.type}
                     </MenuItem>
                   ))}
-              </CustomTextField>
+              </CustomTextField> */}
 
               <CustomTextField
                 autoFocus

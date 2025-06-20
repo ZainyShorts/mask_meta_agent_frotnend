@@ -52,6 +52,7 @@ import EditSizeInfo from '@/components/dialogs/edit-size-info'
 import { SizeDataType } from '@/api/interface/sizeInterface'
 import { getToppingSizeByBusinessId } from '@/api/toppings'
 import AddtMenuSizeForm from '@/components/dialogs/add-menu-size-form'
+import ConfirmationModal from '@/components/dialogs/confirm-modal'
 
 // Extend react-table with custom filter functions
 declare module '@tanstack/table-core' {
@@ -132,6 +133,10 @@ const SizeListTable = ({ isCreated, id }: PreviewProps) => {
   const [editMenuSizeFlag, setEditMenuSizeFlag] = useState(false)
   const [deleteMenuSizeFlag, setMenuSizeFlag] = useState(false)
 
+  //confirmation modal for delete
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
+
   const fetchMenuSizes = async () => {
     try {
       const response = await getToppingSizeByBusinessId(id)
@@ -156,8 +161,7 @@ const SizeListTable = ({ isCreated, id }: PreviewProps) => {
   }
 
   // Handler for deleting a menu
-  const handleDeleteMenuSize = (id: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
+  const handleDeleteMenuSize = (id: number) => {
 
     deleteMenuSize(id)
       .then(res => {
@@ -273,7 +277,10 @@ const SizeListTable = ({ isCreated, id }: PreviewProps) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton onClick={e => handleDeleteMenuSize(row.original.id, e)}>
+            <IconButton onClick={()=>{
+              setSelectedMenuId(row.original.id)
+              setIsModalOpen(true)
+            }}>
               <i className='tabler-trash text-[22px] text-textSecondary' />
             </IconButton>
             <div className='flex gap-4 justify-center'>
@@ -327,6 +334,13 @@ const SizeListTable = ({ isCreated, id }: PreviewProps) => {
 
   return (
     <>
+    <ConfirmationModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onConfirm={() => selectedMenuId !== null && handleDeleteMenuSize(selectedMenuId)}
+                    title="Confirm Action"
+                    message="Are you sure you want to proceed with this action? This cannot be undone."
+                  />
       <Card>
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField

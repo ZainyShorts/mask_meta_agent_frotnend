@@ -58,12 +58,12 @@ const CustomModal: React.FC<CustomModalProps> = ({
         '& .MuiDialogContent-root': {
           overflow: 'hidden' // Additional measure to prevent scrolling within content area
         },
-        '& .MuiDialogContentText-root': { color: '#000000' }
+        // '& .MuiDialogContentText-root': { color: '#000000' }
       }}
     >
       <DialogTitle id='form-dialog-title'>{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText className='mbe-3'>{description}</DialogContentText>
+        <DialogContentText sx={{ color: theme => theme.palette.text.primary }} className='mbe-3 '>{description}</DialogContentText>
         <CustomTextField
           id='verification-code'
           autoFocus

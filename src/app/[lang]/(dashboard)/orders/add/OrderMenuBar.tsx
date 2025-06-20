@@ -13,7 +13,7 @@ import CustomTextField from '@/@core/components/mui/TextField'
 import { CreateOrder } from '@/api/interface/orderInterface'
 import { useForm } from 'react-hook-form'
 import { getAllResturants } from '@/api/resturant'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { useParams, useRouter } from 'next/navigation'
 import { getLocalizedUrl } from '@/utils/i18n'
 import { Locale } from '@/configs/i18n'
@@ -230,49 +230,60 @@ const OrderMenuBar = () => {
         <div className='p-6 rounded'>
           <div className='flex justify-between gap-4 flex-col sm:flex-row'>
             <div className='flex flex-col gap-6'>
-              <div className='flex items-center gap-2.5'>
-                <Typography variant='h5' className='min-is-[95px]'>
-                  Select Outlet:
-                </Typography>
-                <CustomTextField
-                  className='w-full sm:w-auto'
-                  select
-                  fullWidth
-                  value={selectedRestoId}
-                  onChange={handleRestoChange}
-                  variant='outlined'
-                >
-                  {restoData.length > 0 ? (
-                    restoData.map(resto => (
-                      <MenuItem key={resto.id} value={resto.id}>
-                        {resto.name}
-                      </MenuItem>
-                    ))
-                  ) : (
-                    <MenuItem value='' disabled>
-                      No outlet available
-                    </MenuItem>
-                  )}
-                </CustomTextField>
-              </div>
+  {/* Outlet Selection */}
+  <div className='flex flex-col sm:flex-row sm:items-center gap-2.5'>
+    <Typography variant='h5' className='min-w-[130px]'>
+      🏬 Select Outlet:
+    </Typography>
+    <CustomTextField
+      className='w-full sm:w-auto'
+      select
+      fullWidth
+      value={selectedRestoId}
+      onChange={handleRestoChange}
+      variant='outlined'
+    >
+      {restoData.length > 0 ? (
+        restoData.map(resto => (
+          <MenuItem key={resto.id} value={resto.id}>
+            {resto.name}
+          </MenuItem>
+        ))
+      ) : (
+        <MenuItem value='' disabled>
+          ⚠️ No outlet available
+        </MenuItem>
+      )}
+    </CustomTextField>
+  </div>
 
-              <div>
-                <Typography color='text.primary'>{selectedRestoData?.city}</Typography>
-                <Typography color='text.primary'>{selectedRestoData?.contact_number}</Typography>
-              </div>
-              <div className='flex items-center'>
-                <CustomTextField
-                  label='Enter Special Instruction *'
-                  fullWidth
-                  multiline
-                  rows={3}
-                  placeholder='Enter Special Instruction'
-                  {...register('special_instruction', { required: 'Special Instruction is required' })}
-                  error={!!errors.special_instruction}
-                  helperText={errors.special_instruction?.message}
-                />
-              </div>
-            </div>
+  {/* Outlet Info */}
+  {selectedRestoData && (
+    <div className='pl-1'>
+      <Typography variant='body1' color='text.primary'>
+        📍 {selectedRestoData.city}
+      </Typography>
+      <Typography variant='body1' color='text.primary'>
+        ☎️ {selectedRestoData.contact_number}
+      </Typography>
+    </div>
+  )}
+
+  {/* Special Instruction */}
+  <div className='flex items-center'>
+    <CustomTextField
+      label='📝 Special Instruction *'
+      fullWidth
+      multiline
+      rows={3}
+      placeholder='Enter any preparation or delivery notes...'
+      {...register('special_instruction', { required: 'Special Instruction is required' })}
+      error={!!errors.special_instruction}
+      helperText={errors.special_instruction?.message}
+    />
+  </div>
+</div>
+
 
             <div className='flex flex-col gap-2'>
               <div className='flex items-center gap-4'>
@@ -300,8 +311,9 @@ const OrderMenuBar = () => {
                   error={!!errors.delivery_type}
                   helperText={errors.delivery_type?.message}
                 >
-                  <MenuItem value='delivery'>Delivery</MenuItem>
-                  <MenuItem value='pickup'>Pick Up</MenuItem>
+                  <MenuItem value='delivery'>🚚 Delivery</MenuItem>
+                  <MenuItem value='pickup'>🏃‍♂️ Pick Up</MenuItem>
+
                 </CustomTextField>
               </div>
               <div className='flex items-center'>
@@ -342,78 +354,94 @@ const OrderMenuBar = () => {
         </Box>
 
         <Box sx={{ width: '25%', bgcolor: 'background.paper' }}>
-          <Card sx={{ p: 2 }}>
-            <Typography variant='h6' className='mb-4'>
-              Current Order
-            </Typography>
+  <Card sx={{ p: 3 }}>
+    <Typography variant='h6' mb={3}>
+      Current Order
+    </Typography>
 
-            {order.map(item => (
-              <Box
-                key={item.id}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 2,
-                  p: 1,
-                  borderBottom: '1px solid #eee'
-                }}
-              >
-                <Box>
-                  <Typography variant='body1'>{item.name}</Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                    ${(Number(item.price) * item.quantity).toFixed(2)}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <IconButton size='small' onClick={() => decrementQuantity(item.id)} sx={{ border: '1px solid #ddd' }}>
-                    -
-                  </IconButton>
-                  <Typography component='span' mx={1}>
-                    {item.quantity}
-                  </Typography>
-                  <IconButton size='small' onClick={() => incrementQuantity(item.id)} sx={{ border: '1px solid #ddd' }}>
-                    +
-                  </IconButton>
-                  <IconButton size='small' color='error' onClick={() => deleteItem(item.id)}>
-                    ×
-                  </IconButton>
-                </Box>
-              </Box>
-            ))}
-
-            <Divider sx={{ my: 2 }} />
-
-            <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Subtotal:</Typography>
-                <Typography>${subtotal.toFixed(2)}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Tax:</Typography>
-                <Typography>$0.00</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                <Typography>Total:</Typography>
-                <Typography>${total.toFixed(2)}</Typography>
-              </Box>
-            </Box>
-
-            <Button
-              variant='contained'
-              color='primary'
-              fullWidth
-              onClick={handleSubmit(onSubmit)}
-              disabled={loading || order.length === 0}
-            >
-              Process Order
-            </Button>
-          </Card>
+    {order.map(item => (
+      <Box
+        key={item.id}
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2,
+          pb: 1,
+          borderBottom: '1px solid #eee'
+        }}
+      >
+        {/* Left: Item Name & Price */}
+        <Box sx={{ flex: 1 }}>
+          <Typography variant='body1'>{item.name}</Typography>
+          <Typography variant='body2' color='text.secondary'>
+            ${(Number(item.price) * item.quantity).toFixed(2)}
+          </Typography>
         </Box>
+
+        {/* Right: Quantity Controls */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton
+            size='small'
+            onClick={() => decrementQuantity(item.id)}
+            sx={{ border: '1px solid #ddd', width: 30, height: 30 }}
+          >
+            -
+          </IconButton>
+          <Typography sx={{ minWidth: 20, textAlign: 'center' }}>{item.quantity}</Typography>
+          <IconButton
+            size='small'
+            onClick={() => incrementQuantity(item.id)}
+            sx={{ border: '1px solid #ddd', width: 30, height: 30 }}
+          >
+            +
+          </IconButton>
+          <IconButton
+            size='small'
+            color='error'
+            onClick={() => deleteItem(item.id)}
+            sx={{ width: 30, height: 30 }}
+          >
+            ×
+          </IconButton>
+        </Box>
+      </Box>
+    ))}
+
+    <Divider sx={{ my: 3 }} />
+
+    {/* Totals */}
+    <Box sx={{ mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Typography>Subtotal:</Typography>
+        <Typography>${subtotal.toFixed(2)}</Typography>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Typography>Tax:</Typography>
+        <Typography>$0.00</Typography>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+        <Typography>Total:</Typography>
+        <Typography>${total.toFixed(2)}</Typography>
+      </Box>
+    </Box>
+
+    <Button
+      variant='contained'
+      color='primary'
+      fullWidth
+      onClick={handleSubmit(onSubmit)}
+      disabled={loading || order.length === 0}
+    >
+      Process Order
+    </Button>
+  </Card>
+</Box>
+
       </Box>
 
       {loading && <Loader />}
-      <Toaster />
+      {/* <Toaster /> */}
     </div>
   )
 }
