@@ -274,7 +274,7 @@ const EarningReports: React.FC = () => {
         },
         {
           type: 'BODY',
-          text: "Please share your address with us. We'll ensure your order reaches you hot and fresh.Tap the button below to provide your address."
+          text: "Please share your address with us. We will ensure your order reaches you safe and quick."
         },
         // {
         //   type: 'FOOTER',
@@ -317,7 +317,7 @@ const EarningReports: React.FC = () => {
       language: 'en',
 
       components: [
-        { type: 'HEADER', format: 'TEXT', text: 'Welcome to Whats-Eat!' },
+        { type: 'HEADER', format: 'TEXT', text: 'Welcome to Kosmos!' },
         {
           type: 'BODY',
           text: `
@@ -327,8 +327,7 @@ Our app makes it easy for you to place orders at your favorite restaurants. To e
 
 *How We Use Your Data*
 1. *Order Fulfillment* – We store your address and phone number to ensure smooth and accurate delivery of your orders.  
-2. *Exclusive Offers* – Your phone number is securely stored so we can inform you about special promotions and discounts.  
-3. *Data Deletion Requests* – You have full control over your data. If you wish to delete your information, simply send us a request, and we will permanently remove it within 30 days.  
+2. *Data Deletion Requests* – You have full control over your data. If you wish to delete your information, simply send us a request, and we will permanently remove it within 30 days.  
 4. *Third-Party Policies* – For details on Meta and WhatsApp’s privacy policies, please refer to their official documentation.  
 5. *Your Privacy Matters* – We are fully *GDPR-compliant*. To learn more about how we store, use, and share your data, please read our *Privacy Policy* below.  
 
@@ -468,10 +467,10 @@ For any questions or concerns, feel free to contact us.
               type: 'QUICK_REPLY',
               text: 'Delivery'
             },
-            {
-              type: 'QUICK_REPLY',
-              text: 'Pickup'
-            }
+            // {
+            //   type: 'QUICK_REPLY',
+            //   text: 'Pickup'
+            // }
           ]
         }
       ],
@@ -500,7 +499,7 @@ For any questions or concerns, feel free to contact us.
       components: [
         {
           type: 'BODY',
-          text: `Please click on link to open menu card: https://wa.me/c/${contact_number}`
+          text: `Please click on the following link or the store icon on top right corner to open the catalogue. https://wa.me/c/${contact_number}`
         },
         {
           type: 'BUTTONS',

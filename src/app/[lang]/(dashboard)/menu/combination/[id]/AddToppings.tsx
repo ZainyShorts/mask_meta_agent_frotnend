@@ -214,7 +214,7 @@ const AddToppings = ({ id, isCreated, onCreateTopping }: PreviewToppingsProps) =
                 fullWidth
                 type='number'
                 placeholder='Enter Additional Price'
-                inputProps={{ step: 'any', min: '0.1' }} // Allows precise decimal values
+                inputProps={{ step: 'any', min: '0' }} // Allows precise decimal values
                 {...register('additional_price', {
                   required: 'Additional Price is required',
                   pattern: {
@@ -222,8 +222,8 @@ const AddToppings = ({ id, isCreated, onCreateTopping }: PreviewToppingsProps) =
                     message: 'Only positive integers or decimal values are allowed'
                   },
                   min: {
-                    value: 0.1, // Ensures greater than 0
-                    message: 'Value must be at least 0.1'
+                    value: 0, // Ensures greater than 0
+                    message: 'Value must be at least 0'
                   }
                 })}
                 error={!!errors.additional_price}

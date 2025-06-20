@@ -20,6 +20,8 @@ export const GET = async (endpoint: string) => {
       }
     })
 
+    console.log(response)
+
     return response
   } catch (error) {
     const axiosError = error as AxiosError
