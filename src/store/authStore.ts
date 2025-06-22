@@ -19,6 +19,7 @@ interface User {
   city: string
   mobile: number | string
   phoneNumber: number | string
+  subscription: boolean
 }
 
 // Define the shape of the AuthState

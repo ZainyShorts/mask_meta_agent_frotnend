@@ -116,7 +116,7 @@ const UserDropdown = () => {
        toast.success('User logged out successfully')
        router.push(getLocalizedUrl('/login', locale as Locale))
        localStorage.removeItem('auth_token')
-       clearAuth()
+      //  clearAuth()
        setOpen(false)
       }
     } catch (error) {

@@ -1,9 +1,15 @@
 export function getBaseUrl(): string {
-  const baseUrl = 'http://localhost:9000/api/'
+  const baseUrl = 'http://localhost:8000/api/'
   return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
 }
 
 export const ENDPOINTS = {
+  paypal_confirm_subscription: 'paypal_confirm_subscription',
+  renewSubscription: 'renew-subscription',
+  cancelSubscription: 'cancel-subscription',
+  subscription: 'subscription',
+  invoices: 'invoices',
+  stripeCheckout: 'create-checkout-session',
   login: 'login',
   logout: 'logout',
   register: 'register',

@@ -167,6 +167,7 @@ export async function getUserByIduy(id: number): Promise<any> {
       data: id
     })
 
+  
     return response
   } catch (error: any) {
     if (error.response) {

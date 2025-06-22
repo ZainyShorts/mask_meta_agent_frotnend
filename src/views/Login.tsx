@@ -220,7 +220,11 @@ const Login = ({ mode }: { mode: SystemMode }) => {
       })
       // router.push('/home')
       // router.push(getLocalizedUrl('/home', locale as Locale))
-      router.push(getLocalizedUrl('/home', locale))
+      if(data.user.subscription === false){
+        router.push(getLocalizedUrl('/account-settings', locale))
+      }else{
+        router.push(getLocalizedUrl('/home', locale))
+      }
     } catch (error: any) {
     } finally {
       setLoadingVerify(false)
@@ -339,7 +343,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
               loadingVerify={loadingVerify}
             />
           </form>
-          <Toaster position='top-right' reverseOrder={false} />
+          {/* <Toaster position='top-right' reverseOrder={false} /> */}
         </div>
       </div>
     </div>
