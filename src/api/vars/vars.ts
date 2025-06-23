@@ -1,5 +1,5 @@
 export function getBaseUrl(): string {
-  const baseUrl = 'https://l8wlljm3-8000.inc1.devtunnels.ms/api/'
+  const baseUrl = 'http://localhost:8000/api/'
   return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
 }
 
