@@ -26,6 +26,7 @@ import { i18n } from '@configs/i18n'
 // Util Imports
 import { getDictionary } from '@/utils/getDictionary'
 import { getMode, getSystemMode } from '@core/utils/serverHelpers'
+import SubscriptionGuard from './SubscriptionGuard'
 
 const Layout = async ({ children, params }: ChildrenType & { params: { lang: Locale } }) => {
   // Vars
@@ -53,11 +54,13 @@ const Layout = async ({ children, params }: ChildrenType & { params: { lang: Loc
           </HorizontalLayout>
         }
       />
+       <SubscriptionGuard>
       <ScrollToTop className='mui-fixed'>
         <Button variant='contained' className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'>
           <i className='tabler-arrow-up' />
         </Button>
       </ScrollToTop>
+      </SubscriptionGuard>
       <Customizer dir={direction} />
     </Providers>
   )

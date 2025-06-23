@@ -138,6 +138,7 @@ const Filter = ({ column, table }: { column: Column<any, unknown>; table: Table<
 
 const ResturantUserDataTable = ({ token }: { token?: string }) => {
   const router = useRouter()
+  
 
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])

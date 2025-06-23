@@ -28,10 +28,12 @@ const PayPalSubscribeButton = ({ handleStripePayment, userEmail }: PayPalSubscri
     return result.subscriptionID;
   };
 
+  
+
   return (
     <PayPalScriptProvider
       options={{
-        clientId: "AQEakujmEwbIu2pelFs7i6v0BpRn_f5xTnXQgsCU7pxcdG2ZBe6PkMHmgBglVbRlbPcbmgceZWgZqxRK",
+        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENTID || "",
         vault: true,
         intent: "subscription",
       }}

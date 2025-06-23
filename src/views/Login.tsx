@@ -218,8 +218,6 @@ const Login = ({ mode }: { mode: SystemMode }) => {
         duration: 5000, // Duration in milliseconds (5 seconds)
         position: 'top-right'
       })
-      // router.push('/home')
-      // router.push(getLocalizedUrl('/home', locale as Locale))
       if(data.user.subscription === false){
         router.push(getLocalizedUrl('/account-settings', locale))
       }else{
