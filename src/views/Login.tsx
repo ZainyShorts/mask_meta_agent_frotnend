@@ -213,7 +213,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
       setToken(data?.token)
       setUser(data?.user)
 
-      document.cookie = `auth_token=${data.token}; path=/; max-age=604800; Secure; HttpOnly`
+      document.cookie = `auth_token=${data.token}; path=/; max-age=18000; Secure; HttpOnly`
       toast.success(data.message, {
         duration: 5000, // Duration in milliseconds (5 seconds)
         position: 'top-right'

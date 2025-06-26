@@ -204,7 +204,7 @@ const InvoiceListTable = () => {
                 </Typography>
                 <br />
                 <Typography variant="body2" component="span" className="text-inherit">
-                  Invoice ID: {row.original.stripe_invoice_id}
+                  Invoice ID: {row.original.invoice_id}
                 </Typography>
               </div>
             }

@@ -71,6 +71,10 @@ const PayPalSubscribeButton = ({ handleStripePayment, userEmail }: PayPalSubscri
               fundingSource={FUNDING.CARD}
               style={{ layout: "horizontal", height: 48 }}
               createSubscription={createSubscription}
+              onApprove={async() => {
+                window.location.href = '/en/login';
+                return
+              }}
             /> 
           </div>
         </div>
