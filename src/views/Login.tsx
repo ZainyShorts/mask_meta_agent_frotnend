@@ -213,14 +213,16 @@ const Login = ({ mode }: { mode: SystemMode }) => {
       setToken(data?.token)
       setUser(data?.user)
 
-      document.cookie = `auth_token=${data.token}; path=/; max-age=604800; Secure; HttpOnly`
+      document.cookie = `auth_token=${data.token}; path=/; max-age=18000; Secure; HttpOnly`
       toast.success(data.message, {
         duration: 5000, // Duration in milliseconds (5 seconds)
         position: 'top-right'
       })
-      // router.push('/home')
-      // router.push(getLocalizedUrl('/home', locale as Locale))
-      router.push(getLocalizedUrl('/home', locale))
+      if(data.user.subscription === false){
+        router.push(getLocalizedUrl('/account-settings', locale))
+      }else{
+        router.push(getLocalizedUrl('/home', locale))
+      }
     } catch (error: any) {
     } finally {
       setLoadingVerify(false)
@@ -339,7 +341,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
               loadingVerify={loadingVerify}
             />
           </form>
-          <Toaster position='top-right' reverseOrder={false} />
+          {/* <Toaster position='top-right' reverseOrder={false} /> */}
         </div>
       </div>
     </div>

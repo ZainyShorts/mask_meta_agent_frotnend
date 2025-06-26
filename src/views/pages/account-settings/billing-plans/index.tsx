@@ -932,12 +932,12 @@ const BillingPlans = () => {
       <Grid item xs={12}>
         <CurrentPlan data={pricingPlanDb} />
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <PaymentMethod />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid> */}
+      {/* <Grid item xs={12}>
         <Address />
-      </Grid>
+      </Grid> */}
       <Grid item xs={12}>
         <InvoiceListTable invoiceData={db} />
       </Grid>

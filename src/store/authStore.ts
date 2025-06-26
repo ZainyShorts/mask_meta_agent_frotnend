@@ -19,6 +19,7 @@ interface User {
   city: string
   mobile: number | string
   phoneNumber: number | string
+  subscription: boolean
 }
 
 // Define the shape of the AuthState
@@ -61,6 +62,8 @@ interface AuthState {
   returnOrderAction: (returnOrderData: any) => void
   userAction: (userData: any) => void
 }
+
+
 
 // Create the store with persistence for both token and user
 export const useAuthStore = create<AuthState>()(
