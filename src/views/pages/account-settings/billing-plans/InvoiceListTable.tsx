@@ -72,8 +72,8 @@ type InvoiceData = {
 }
 
 type InvoiceDataWithAction = InvoiceData & {
-  action?: string
-  paid: string
+  action?: string;
+  paid: string;
 }
 
 type InvoiceStatusObj = {
