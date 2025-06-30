@@ -4,9 +4,9 @@ import type { MenuDataType, SyncMenuDataType } from './interface/menuIterface'
 import { ENDPOINTS } from './vars/vars'
 import { GET, GETBYID, PATCH, POST, DELETE } from './api'
 
-export async function getAllMenues(): Promise<any> {
+export async function getAllMenues(businessId : string): Promise<any> {
   try {
-    const url = `whatseat/${ENDPOINTS.menus}/`
+    const url = `whatseat/${ENDPOINTS.menus}/${businessId}/`
     const response = await GET(url)
 
     return response
@@ -18,6 +18,12 @@ export async function getAllMenues(): Promise<any> {
     }
   }
 }
+
+
+
+
+
+// by-business
 
 export async function createMenu(data: MenuDataType): Promise<any> {
   try {

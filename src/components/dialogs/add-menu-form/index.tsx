@@ -1,36 +1,36 @@
-'use client'
+"use client"
+
+import type React from "react"
 
 // React Imports
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
-import Dialog from '@mui/material/Dialog'
-import Button from '@mui/material/Button'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import MenuItem from '@mui/material/MenuItem'
-import Typography from '@mui/material/Typography'
+import Grid from "@mui/material/Grid"
+import Dialog from "@mui/material/Dialog"
+import Button from "@mui/material/Button"
+import DialogTitle from "@mui/material/DialogTitle"
+import DialogContent from "@mui/material/DialogContent"
+import DialogActions from "@mui/material/DialogActions"
+import MenuItem from "@mui/material/MenuItem"
 
 // Component Imports
-import DialogCloseButton from '../DialogCloseButton'
-import CustomTextField from '@core/components/mui/TextField'
-import { MenuDataType } from '@/api/interface/menuIterface'
-import { createMenu, updateMenu } from '@/api/menu'
-import toast, { Toaster } from 'react-hot-toast'
-import { useParams, useRouter } from 'next/navigation'
-import { getAllResturants } from '@/api/resturant'
-import { getAllBusiness } from '@/api/business'
-import { BusinessType } from '@/types/apps/businessTypes'
-import { ToppingDataType } from '@/api/interface/toppingInterface'
-import { getAllFoodTypes, getAllFoodTypesOfSpecificBusiness } from '@/api/foodTypes'
-import OpenDialogOnElementClick from '../OpenDialogOnElementClick'
-import type { ButtonProps } from '@mui/material/Button'
-import type { ThemeColor } from '@core/types'
-import Loader from '@/components/loader/Loader'
-import AddType from '@/components/dialogs/add-type'
+import DialogCloseButton from "../DialogCloseButton"
+import CustomTextField from "@core/components/mui/TextField"
+import type { MenuDataType } from "@/api/interface/menuIterface"
+import { createMenu } from "@/api/menu"
+import toast, { Toaster } from "react-hot-toast"
+import { getAllResturants } from "@/api/resturant"
+import { getAllBusiness } from "@/api/business"
+import type { BusinessType } from "@/types/apps/businessTypes"
+import type { ToppingDataType } from "@/api/interface/toppingInterface"
+import { getAllFoodTypesOfSpecificBusiness } from "@/api/foodTypes"
+import OpenDialogOnElementClick from "../OpenDialogOnElementClick"
+import type { ButtonProps } from "@mui/material/Button"
+import type { ThemeColor } from "@core/types"
+import Loader from "@/components/loader/Loader"
+import AddType from "@/components/dialogs/add-type"
 
 type AddtMenuFormProps = {
   open: boolean
@@ -39,10 +39,10 @@ type AddtMenuFormProps = {
   onTypeAdded?: any
 }
 
-const buttonProps = (children: string, color: ThemeColor, variant: ButtonProps['variant']): ButtonProps => ({
+const buttonProps = (children: string, color: ThemeColor, variant: ButtonProps["variant"]): ButtonProps => ({
   children,
   color,
-  variant
+  variant,
 })
 
 const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) => {
@@ -51,15 +51,65 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
   const [userBusinessData, setUserBusinessData] = useState<BusinessType[]>([])
   const [FoodTypeData, setFoodTypeData] = useState<ToppingDataType[]>([])
   const [addType, setAddType] = useState<boolean>(false)
-  const [selectedBrand, setSelectedBrand] = useState<string>('')
-  const [businessId, setBusinessId] = useState<string>('')
-  const [category, setCategory] = useState<string>('')
-  // console.log(businessId, 'businessId')
+  const [selectedBrand, setSelectedBrand] = useState<string>("")
+  const [businessId, setBusinessId] = useState<string>("")
+  const [category, setCategory] = useState<string>("")
+
+  // Validation helper functions
+  const handleNumericInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, decimal point
+    if (
+      [46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||
+      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      (e.keyCode === 65 && e.ctrlKey === true) ||
+      (e.keyCode === 67 && e.ctrlKey === true) ||
+      (e.keyCode === 86 && e.ctrlKey === true) ||
+      (e.keyCode === 88 && e.ctrlKey === true) ||
+      // Allow: home, end, left, right
+      (e.keyCode >= 35 && e.keyCode <= 39)
+    ) {
+      return
+    }
+    // Ensure that it is a number and stop the keypress
+    if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
+      e.preventDefault()
+    }
+  }
+
+  const handleAlphanumericInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter
+    if (
+      [46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      (e.keyCode === 65 && e.ctrlKey === true) ||
+      (e.keyCode === 67 && e.ctrlKey === true) ||
+      (e.keyCode === 86 && e.ctrlKey === true) ||
+      (e.keyCode === 88 && e.ctrlKey === true) ||
+      // Allow: home, end, left, right
+      (e.keyCode >= 35 && e.keyCode <= 39)
+    ) {
+      return
+    }
+    // Allow: letters, numbers, space, underscore, hyphen
+    if (
+      !(
+        (e.keyCode >= 65 && e.keyCode <= 90) || // A-Z
+        (e.keyCode >= 97 && e.keyCode <= 122) || // a-z
+        (e.keyCode >= 48 && e.keyCode <= 57) || // 0-9
+        (e.keyCode >= 96 && e.keyCode <= 105) || // numpad 0-9
+        e.keyCode === 32 || // space
+        e.keyCode === 95 || // underscore
+        e.keyCode === 189
+      )
+    ) {
+      // hyphen
+      e.preventDefault()
+    }
+  }
 
   const handleRestaurantChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const selectedRestaurant = restosData?.find(rest => rest.id === event.target.value)
-    // console.log(selectedRestaurant, 'selectedRestaurant')
-    setSelectedBrand(selectedRestaurant?.name || '')
+    const selectedRestaurant = restosData?.find((rest) => rest.id === event.target.value)
+    setSelectedBrand(selectedRestaurant?.name || "")
   }
 
   const {
@@ -67,14 +117,12 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
     handleSubmit,
     formState: { errors },
     reset,
-    control
+    control,
   } = useForm<MenuDataType>()
 
   const fetchFoodTypes = async () => {
     try {
       const response = await getAllFoodTypesOfSpecificBusiness(businessId)
-      // console.log(response, 'response')
-
       setFoodTypeData(response?.data)
     } catch (error: any) {
       // Handle error
@@ -88,15 +136,14 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
   }, [addType, businessId])
 
   const handleBusinessChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const selectedBusiness = userBusinessData.find(b => b.id === event.target.value)
+    const selectedBusiness = userBusinessData.find((b) => b.id === event.target.value)
     if (selectedBusiness) {
-      setBusinessId(selectedBusiness.business_id) // Store business.business_id in state
+      setBusinessId(selectedBusiness.business_id)
     } else {
-      setBusinessId('')
+      setBusinessId("")
     }
   }
 
-  // States
   const onSubmit = (data: MenuDataType, e: any) => {
     e.preventDefault()
     setLoading(true)
@@ -105,43 +152,38 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
     const payload = {
       ...data,
       title: data.title,
-      // brand: data.brand,
-      brand: selectedBrand,
       description: data.description,
-      availability: 'in stock',
-      condition: 'good',
-      category: category,
+      availability: "in stock",
+      condition: "good",
       business: data.business,
-      restaurant: data.restaurant,
       image_link: data.image_link,
       link: data.link,
       price: data.price,
       sku: data.sku,
-      type: data.type
+      type: data.type,
     }
-    console.log(payload, 'paload')
+
     createMenu(payload)
-      .then(res => {
-        toast.success('Catalouge created successfully', {
-          duration: 5000 // Duration in milliseconds (5 seconds)
+      .then((res) => {
+        toast.success("Catalogue created successfully", {
+          duration: 5000,
         })
         if (onTypeAdded) {
           onTypeAdded()
         }
-
         setAddType(true)
         reset()
         setOpen(false)
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error)
         if (error?.data && error?.data?.availability[0]) {
           toast.error(error?.data?.availability[0], {
-            duration: 5000 // Duration in milliseconds (5 seconds)
+            duration: 5000,
           })
         } else {
-          toast.error('Error in creating Catalouge', {
-            duration: 5000 // Duration in milliseconds (5 seconds)
+          toast.error("Error in creating Catalogue", {
+            duration: 5000,
           })
         }
       })
@@ -152,25 +194,20 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
   }
 
   const handleReset = () => {
-    // handleClose()
     setOpen(false)
     reset()
-    setBusinessId('')
+    setBusinessId("")
   }
 
   useEffect(() => {
     const fetchBusiness = async () => {
       try {
         const response = await getAllBusiness()
-
         setUserBusinessData(response?.data?.results || [])
       } catch (err: any) {
-        // setError(err.message || 'Failed to fetch business')
-      } finally {
-        // setLoading(false)
+        // Handle error
       }
     }
-
     fetchBusiness()
   }, [])
 
@@ -178,56 +215,59 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
     const fetchResturants = async () => {
       try {
         const response = await getAllResturants()
-
         setRestosData(response?.data?.results || [])
       } catch (err: any) {
-        // setError(err.message || 'Failed to fetch users')
-      } finally {
-        // setLoading(false)
+        // Handle error
       }
     }
-
     fetchResturants()
   }, [])
 
   const handleTypeAdded = () => {
     fetchFoodTypes()
   }
-  return (
-    <Dialog fullWidth open={open} maxWidth='md' scroll='body' sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}>
-      <DialogCloseButton onClick={() => setOpen(false)} disableRipple>
-        <i className='tabler-x' />
-      </DialogCloseButton>
 
-      <DialogTitle variant='h4' className='flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'>
-        Add Catalouge Information
+  return (
+    <Dialog fullWidth open={open} maxWidth="md" scroll="body" sx={{ "& .MuiDialog-paper": { overflow: "visible" } }}>
+      <DialogCloseButton onClick={() => setOpen(false)} disableRipple>
+        <i className="tabler-x" />
+      </DialogCloseButton>
+      <DialogTitle variant="h4" className="flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16">
+        Add Catalogue Information
       </DialogTitle>
       <div>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-            <Grid container spacing={5} alignItems='center'>
+          <DialogContent className="overflow-visible pbs-0 sm:pli-16">
+            <Grid container spacing={5} alignItems="center">
               <Grid item xs={12} sm={6}>
                 <CustomTextField
-                  label='Title *'
+                  label="Title *"
                   fullWidth
-                  placeholder='Enter Title'
-                  {...register('title', { required: 'Title is required' })}
+                  placeholder="Enter Title"
+                  onKeyDown={handleAlphanumericInput}
+                  {...register("title", {
+                    required: "Title is required",
+                    pattern: {
+                      value: /^[a-zA-Z0-9\s_-]+$/,
+                      message: "Only letters, numbers, spaces, underscores, and hyphens are allowed",
+                    },
+                  })}
                   error={!!errors.title}
                   helperText={errors.title?.message}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomTextField
-                  label='Sku *'
+                  label="SKU *"
                   fullWidth
-                  placeholder='Enter sku'
-                  // {...register('sku', { required: 'sku is required' })}
-                  {...register('sku', {
-                    required: 'SKU is required',
+                  placeholder="Enter SKU"
+                  onKeyDown={handleAlphanumericInput}
+                  {...register("sku", {
+                    required: "SKU is required",
                     pattern: {
-                      value: /^[a-z0-9_]+$/,
-                      message: 'Only lowercase letters, numbers, and underscores are allowed'
-                    }
+                      value: /^[a-zA-Z0-9_-]+$/,
+                      message: "Only letters, numbers, underscores, and hyphens are allowed",
+                    },
                   })}
                   error={!!errors.sku}
                   helperText={errors.sku?.message}
@@ -237,93 +277,86 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
                 <CustomTextField
                   select
                   fullWidth
-                  id='business'
-                  label='Select Business *'
-                  {...register('business', { required: 'Business Id is required ' })}
+                  id="business"
+                  label="Select Business *"
+                  {...register("business", { required: "Business ID is required" })}
                   error={!!errors.business}
                   helperText={errors.business?.message}
                   onChange={handleBusinessChange}
                 >
                   {userBusinessData &&
-                    userBusinessData?.map(business => (
+                    userBusinessData?.map((business) => (
                       <MenuItem key={business.id} value={business.id}>
                         {business.business_id}
                       </MenuItem>
                     ))}
                 </CustomTextField>
               </Grid>
-              
-
               <Grid item xs={12} sm={6}>
                 <CustomTextField
-                  label='Price *'
+                  label="Price *"
                   fullWidth
-                  placeholder='Enter  price '
-                  {...register('price', {
-                    required: 'Price is required',
+                  placeholder="Enter price (numbers only)"
+                  onKeyDown={handleNumericInput}
+                  {...register("price", {
+                    required: "Price is required",
                     pattern: {
-                      // This pattern allows:
-                      // 1. Optional currency symbol at start or end
-                      // 2. Numbers with up to 2 decimal places
-                      // 3. Optional thousands separators (both , and .)
-                      // 4. Spaces between currency symbol and number
-                      value:
-                        /^(?:[\p{Sc}$€¥£₹₽₪₱₩₫₭₮₯₰₲₳₴₵₶₷₸₺₻₼₾₿]?\s*[0-9]{1,3}(?:[,.][0-9]{3})*(?:\.[0-9]{1,2})?\s*(?:[\p{Sc}$€¥£₹₽₪₱₩₫₭₮₯₰₲₳₴₵₶₷₸₺₻₼₾₿]|[A-Za-z]{3})?)$/u,
-                      message: 'Please enter a valid price with an optional currency symbol or abbreviation'
-                    }
+                      value: /^\d+(\.\d{1,2})?$/,
+                      message: "Please enter a valid price (numbers only, up to 2 decimal places)",
+                    },
+                    validate: {
+                      positive: (value) => Number.parseFloat(String(value)) > 0 || "Price must be greater than 0",
+                    },
                   })}
                   error={!!errors.price}
                   helperText={errors.price?.message}
                 />
               </Grid>
-
               <Grid item xs={12} sm={6}>
                 <CustomTextField
-                  select
+                  label="Description *"
                   fullWidth
-                  id='category'
-                  label='Select Category *'
-                  {...register('category', { required: 'Category is required ' })}
-                  error={!!errors.category}
-                  helperText={errors.category?.message}
-                  onChange={(e)=>setCategory(e.target.value)}
-                >
-                      <MenuItem value={'stitched'}>
-                        {"Stitched"}
-                      </MenuItem>
-                      <MenuItem value={'unstitched'}>
-                        {"Unstitched"}
-                      </MenuItem>
-                </CustomTextField>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <CustomTextField
-                  label='Description *'
-                  fullWidth
-                  placeholder='Enter Description '
-                  {...register('description', { required: 'Description is required ' })}
+                  placeholder="Enter Description"
+                  onKeyDown={handleAlphanumericInput}
+                  {...register("description", {
+                    required: "Description is required",
+                    pattern: {
+                      value: /^[a-zA-Z0-9\s.,!?_-]+$/,
+                      message: "Only letters, numbers, spaces, and basic punctuation are allowed",
+                    },
+                  })}
                   error={!!errors.description}
                   helperText={errors.description?.message}
                 />
               </Grid>
-
               <Grid item xs={12} sm={6}>
                 <CustomTextField
-                  label='Product Link *'
+                  label="Product Link *"
                   fullWidth
-                  placeholder='Enter Product link '
-                  {...register('link', { required: 'Product Link is required ' })}
+                  placeholder="Enter Product Link"
+                  {...register("link", {
+                    required: "Product Link is required",
+                    pattern: {
+                      value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
+                      message: "Please enter a valid URL",
+                    },
+                  })}
                   error={!!errors.link}
                   helperText={errors.link?.message}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomTextField
-                  label='Image Link *'
+                  label="Image Link *"
                   fullWidth
-                  placeholder='Enter Image Link '
-                  {...register('image_link', { required: 'Image Link is required ' })}
+                  placeholder="Enter Image Link"
+                  {...register("image_link", {
+                    required: "Image Link is required",
+                    pattern: {
+                      value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
+                      message: "Please enter a valid URL",
+                    },
+                  })}
                   error={!!errors.image_link}
                   helperText={errors.image_link?.message}
                 />
@@ -331,64 +364,37 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
               {businessId && (
                 <>
                   <Grid item xs={12} sm={6}>
-                    <CustomTextField
-                      select
-                      fullWidth
-                      id='restaurant'
-                      // label='Select Outlet (Optional)'
-                      label='Select Outlet'
-                      inputProps={{ placeholder: 'Outlet', ...register('restaurant') }}
-                      onChange={handleRestaurantChange}
-                      error={!!errors.restaurant}
-                      helperText={errors.restaurant?.message}
-                    >
-                      {restosData &&
-                        restosData?.map(rest => (
-                          <MenuItem key={rest.id} value={rest.id}>
-                            {rest.name}
-                          </MenuItem>
-                        ))}
-                    </CustomTextField>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
                       <CustomTextField
                         select
                         fullWidth
-                        label='Select Type *'
-                        {...register('type', {
-                          required: 'Type is required'
+                        label="Select Type *"
+                        {...register("type", {
+                          required: "Type is required",
                         })}
-                        error={!!errors.business}
-                        helperText={errors.business?.message}
-                        style={{ flex: 1 }} // Takes up remaining space
+                        error={!!errors.type}
+                        helperText={errors.type?.message}
+                        style={{ flex: 1 }}
                       >
-                        {/* {FoodTypeData &&
-                          FoodTypeData?.map(food => (
-                            <MenuItem key={food.id} value={food.id}>
-                              {food.name}
-                            </MenuItem>
-                          ))} */}
                         {FoodTypeData.length > 0 ? (
-                          FoodTypeData.map(food => (
+                          FoodTypeData.map((food) => (
                             <MenuItem key={food.id} value={food.id}>
                               {food.name}
                             </MenuItem>
                           ))
                         ) : (
-                          <MenuItem disabled value=''>
+                          <MenuItem disabled value="">
                             No type available
                           </MenuItem>
                         )}
                       </CustomTextField>
-
-                      <div style={{ marginLeft: '10px', marginTop: errors.title ? '0px' : '17px', flex: '0 0 10%' }}>
+                      <div style={{ marginLeft: "10px", marginTop: errors.type ? "0px" : "17px", flex: "0 0 10%" }}>
                         <OpenDialogOnElementClick
                           element={Button}
-                          elementProps={buttonProps('Add', 'primary', 'contained')}
+                          elementProps={buttonProps("Add", "primary", "contained")}
                           dialog={AddType}
                           dialogProps={{}}
-                          onTypeAdded={handleTypeAdded} // Pass the callback
+                          onTypeAdded={handleTypeAdded}
                         />
                       </div>
                     </div>
@@ -396,19 +402,17 @@ const AddtMenuForm = ({ open, setOpen, data, onTypeAdded }: AddtMenuFormProps) =
                 </>
               )}
             </Grid>
-            <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16 mt-5'>
-              <Button variant='contained' type='submit' disabled={loading}>
+            <DialogActions className="justify-center pbs-0 sm:pbe-16 sm:pli-16 mt-5">
+              <Button variant="contained" type="submit" disabled={loading}>
                 Submit
               </Button>
-              <Button variant='tonal' color='error' type='reset' onClick={() => handleReset()}>
+              <Button variant="tonal" color="error" type="reset" onClick={() => handleReset()}>
                 Cancel
               </Button>
             </DialogActions>
-
             {loading && <Loader />}
           </DialogContent>
         </form>
-
         <Toaster />
       </div>
     </Dialog>

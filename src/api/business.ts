@@ -5,9 +5,15 @@ import { DELETE, GET, GETBYID, PATCH, POST, POSTFILE, SEARCHBYPARAMSPAGINATION }
 import { ENDPOINTS } from './vars/vars'
 import { BusinessEditPayload, BusinessType } from '@/types/apps/businessTypes'
 
-export async function getAllBusiness(): Promise<any> {
+export const getAllBusiness = async (params?: { search?: string }) =>{
   try {
-    const url = `whatseat/${ENDPOINTS.userbusinesses}/`
+    let url = `whatseat/${ENDPOINTS.userbusinesses}/`
+
+    if (params?.search) {
+      const searchParams = new URLSearchParams({ search: params.search })
+      url += `?${searchParams.toString()}`
+    }
+
     const response = await GET(url)
     return response
   } catch (error: any) {

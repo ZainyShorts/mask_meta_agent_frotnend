@@ -527,6 +527,7 @@ const CurrentPlan = ({ data }: { data: PricingPlanType[] }) => {
 
       if(response.status === 401){
       window.location.href = '/en/login'
+      
     }
 
       if (!response.ok) {

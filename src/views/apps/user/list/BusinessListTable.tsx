@@ -1,22 +1,27 @@
-'use client'
+"use client"
+
 // React Imports
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from "react"
+
 // Next Imports
-import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import Link from "next/link"
+import { useParams, useRouter } from "next/navigation"
+
 // MUI Imports
-import Card from '@mui/material/Card'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import Checkbox from '@mui/material/Checkbox'
-import IconButton from '@mui/material/IconButton'
-import { styled } from '@mui/material/styles'
-import TablePagination from '@mui/material/TablePagination'
-import type { TextFieldProps } from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
+import Card from "@mui/material/Card"
+import Button from "@mui/material/Button"
+import Typography from "@mui/material/Typography"
+import Checkbox from "@mui/material/Checkbox"
+import IconButton from "@mui/material/IconButton"
+import { styled } from "@mui/material/styles"
+import TablePagination from "@mui/material/TablePagination"
+import type { TextFieldProps } from "@mui/material/TextField"
+import MenuItem from "@mui/material/MenuItem"
+import InputAdornment from "@mui/material/InputAdornment"
+
 // Third-party Imports
-import classnames from 'classnames'
-import { rankItem } from '@tanstack/match-sorter-utils'
+import classnames from "classnames"
+import { rankItem } from "@tanstack/match-sorter-utils"
 import {
   createColumnHelper,
   flexRender,
@@ -27,35 +32,31 @@ import {
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
   getPaginationRowModel,
-  getSortedRowModel
-} from '@tanstack/react-table'
-import type { ColumnDef, FilterFn } from '@tanstack/react-table'
-import type { RankingInfo } from '@tanstack/match-sorter-utils'
+  getSortedRowModel,
+} from "@tanstack/react-table"
+import type { ColumnDef, FilterFn } from "@tanstack/react-table"
+import type { RankingInfo } from "@tanstack/match-sorter-utils"
 
 // Type Imports
-import toast from 'react-hot-toast'
-
-import type { ThemeColor } from '@core/types'
+import toast from "react-hot-toast"
+import type { ThemeColor } from "@core/types"
 
 // Component Imports
+import TablePaginationComponent from "@components/TablePaginationComponent"
+import CustomTextField from "@core/components/mui/TextField"
+import tableStyles from "@core/styles/table.module.css"
+import type { BusinessTypeForFile } from "@/types/apps/businessTypes"
+import { deleteBusiness, getAllBusiness } from "@/api/business"
+import EditBusinessInfo from "@/components/dialogs/edit-business-info"
+import { useAuthStore } from "@/store/authStore"
+import OpenDialogOnElementClick from "@/components/dialogs/OpenDialogOnElementClick"
+import type { ButtonProps } from "@mui/material/Button"
+import { getLocalizedUrl } from "@/utils/i18n"
+import type { Locale } from "@/configs/i18n"
+import AddBusinessForm from "@/components/dialogs/add-business-form"
+import ConfirmationModal from "@/components/dialogs/confirm-modal"
 
-import TablePaginationComponent from '@components/TablePaginationComponent'
-import CustomTextField from '@core/components/mui/TextField'
-
-import tableStyles from '@core/styles/table.module.css'
-
-import type { BusinessTypeForFile } from '@/types/apps/businessTypes'
-import { deleteBusiness, getAllBusiness } from '@/api/business'
-import EditBusinessInfo from '@/components/dialogs/edit-business-info'
-import { useAuthStore } from '@/store/authStore'
-import OpenDialogOnElementClick from '@/components/dialogs/OpenDialogOnElementClick'
-import type { ButtonProps } from '@mui/material/Button'
-import { getLocalizedUrl } from '@/utils/i18n'
-import { Locale } from '@/configs/i18n'
-import AddBusinessForm from '@/components/dialogs/add-business-form'
-import ConfirmationModal from '@/components/dialogs/confirm-modal'
-
-declare module '@tanstack/table-core' {
+declare module "@tanstack/table-core" {
   interface FilterFns {
     fuzzy: FilterFn<unknown>
   }
@@ -68,24 +69,14 @@ type BusinessTypeWithAction = BusinessTypeForFile & {
   action?: string
 }
 
-type UserRoleType = {
-  [key: string]: { icon: string; color: string }
-}
-
-type UserStatusType = {
-  [key: string]: ThemeColor
-}
-
 // Styled Components
-const Icon = styled('i')({})
+const Icon = styled("i")({})
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
-
   addMeta({
-    itemRank
+    itemRank,
   })
-
   return itemRank.passed
 }
 
@@ -98,7 +89,7 @@ const DebouncedInput = ({
   value: string | number
   onChange: (value: string | number) => void
   debounce?: number
-} & Omit<TextFieldProps, 'onChange'>) => {
+} & Omit<TextFieldProps, "onChange">) => {
   const [value, setValue] = useState(initialValue)
 
   useEffect(() => {
@@ -113,13 +104,13 @@ const DebouncedInput = ({
     return () => clearTimeout(timeout)
   }, [value, debounce, onChange])
 
-  return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
+  return <CustomTextField {...props} value={value} onChange={(e) => setValue(e.target.value)} />
 }
 
-const buttonProps = (children: string, color: ThemeColor, variant: ButtonProps['variant']): ButtonProps => ({
+const buttonProps = (children: string, color: ThemeColor, variant: ButtonProps["variant"]): ButtonProps => ({
   children,
   color,
-  variant
+  variant,
 })
 
 // Column Definitions
@@ -128,58 +119,100 @@ const columnHelper = createColumnHelper<BusinessTypeWithAction>()
 const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] }) => {
   const router = useRouter()
   const { lang: locale } = useParams()
-
   const [rowSelection, setRowSelection] = useState({})
-  const { businessAction, businessData, editFlag } = useAuthStore()
+  const { businessAction, businessData } = useAuthStore()
   const [editBusinessFlag, setEditBusinessFlag] = useState<boolean>(false)
   const [deleteBusinessOpen, setDeleteBusinessOpen] = useState(false)
   const [loading, setLoading] = useState<boolean>(false)
-
   const [data, setData] = useState<BusinessTypeForFile[]>(tableData || [])
-  const [globalFilter, setGlobalFilter] = useState('')
+  const [globalFilter, setGlobalFilter] = useState("")
+
+  // Add search state
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isSearching, setIsSearching] = useState(false)
 
   //confirmation modal for delete
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
+  const { user } = useAuthStore()
 
-  const fetchBusiness = async () => {
-    try {
-      setLoading(true)
-      const response = await getAllBusiness()
-      setLoading(false)
+  // Updated fetchBusiness function to accept search parameter
+  const fetchBusiness = useCallback(
+    async (search?: string) => {
+      try {
+        setLoading(true)
+        if (search) {
+          setIsSearching(true)
+        }
 
-      setData(response?.data?.results || [])
-      businessAction(response.data.results)
-    } catch (err: any) {
-    } finally {
-      setLoading(false)
-    }
-  }
+        // Modify your API call to include search parameter
+        const response = await getAllBusiness(search ? { search } : undefined)
 
+        const newData = response?.data?.results || []
+        setData(newData)
+
+        // Only call businessAction if data actually changed
+        if (JSON.stringify(newData) !== JSON.stringify(businessData)) {
+          businessAction(newData)
+        }
+      } catch (err: any) {
+        toast.error(err.message || "Failed to fetch businesses")
+      } finally {
+        setLoading(false)
+        setIsSearching(false)
+      }
+    },
+    [], // Remove businessAction from dependencies to prevent infinite loops
+  )
+
+  // Initial fetch - only run once on mount
   useEffect(() => {
     fetchBusiness()
+  }, []) // Empty dependency array
+
+  // Handle delete/edit operations
+  useEffect(() => {
+    if (deleteBusinessOpen || editBusinessFlag) {
+      fetchBusiness(searchQuery || undefined)
+      // Reset flags after fetch
+      if (editBusinessFlag) setEditBusinessFlag(false)
+    }
   }, [deleteBusinessOpen, editBusinessFlag])
 
-  const handleTypeAdded = () => {
-    fetchBusiness()
+  // Handle search query changes with debouncing
+  const handleSearchChange = useCallback(
+    (value: string | number) => {
+      const searchValue = value.toString().trim()
+      setSearchQuery(searchValue)
+
+      // Only fetch when there's a search term with at least 2 characters
+      if (searchValue.length >= 2) {
+        fetchBusiness(searchValue)
+      } else if (searchValue.length === 0) {
+        // Fetch all businesses when search is completely cleared
+        fetchBusiness()
+      }
+    },
+    [fetchBusiness],
+  )
+
+  const handleTypeAdded = useCallback(() => {
+    fetchBusiness(searchQuery || undefined)
     setEditBusinessFlag(true)
-  }
+  }, [fetchBusiness, searchQuery])
 
   const handleDeleteBusiness = (id: number) => {
-
     setLoading(true)
-
     deleteBusiness(id.toString())
-      .then(res => {
-        toast.success('Business deleted successfully')
-        setLoading(false)
+      .then((res) => {
+        toast.success("Business deleted successfully")
         setDeleteBusinessOpen(true)
       })
-      .catch(error => {
+      .catch((error) => {
         if (error?.data && error?.data?.detail) {
           toast.error(error?.data?.detail)
         } else {
-          toast.error('Error in deleting business')
+          toast.error("Error in deleting business")
         }
       })
       .finally(() => {
@@ -188,20 +221,20 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
   }
 
   const truncateText = (text: any, maxLength: any) => {
-    if (!text) return ''
+    if (!text) return ""
     return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
   }
 
   const columns = useMemo<ColumnDef<BusinessTypeWithAction, any>[]>(
     () => [
       {
-        id: 'select',
+        id: "select",
         header: ({ table }) => (
           <Checkbox
             {...{
               checked: table.getIsAllRowsSelected(),
               indeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler()
+              onChange: table.getToggleAllRowsSelectedHandler(),
             }}
           />
         ),
@@ -211,136 +244,134 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
               checked: row.getIsSelected(),
               disabled: !row.getCanSelect(),
               indeterminate: row.getIsSomeSelected(),
-              onChange: row.getToggleSelectedHandler()
+              onChange: row.getToggleSelectedHandler(),
             }}
           />
-        )
+        ),
       },
-      columnHelper.accessor('id', {
-        header: 'ID',
+      columnHelper.accessor("id", {
+        header: "ID",
         cell: ({ row }) => (
           <Typography
             component={Link}
             href={getLocalizedUrl(`/business/${row.original.id}`, locale as Locale)}
-            color='primary'
+            color="primary"
           >{`${row.original.id}`}</Typography>
-        )
+        ),
       }),
-      columnHelper.accessor('business_id', {
-        header: 'Business Meta Id',
+      columnHelper.accessor("business_id", {
+        header: "Business Meta Id",
         cell: ({ row }) => (
-          <div className='flex items-center gap-4'>
-            <div className='flex flex-col'>
-              <Typography color='text.primary' className='font-medium'>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <Typography color="text.primary" className="font-medium">
                 {row?.original?.business_id}
               </Typography>
             </div>
           </div>
-        )
+        ),
       }),
-
-      columnHelper.accessor('name', {
-        header: 'Business Name',
+      columnHelper.accessor("name", {
+        header: "Business Name",
         cell: ({ row }) => (
-          <div className='flex items-center gap-4'>
-            <div className='flex flex-col'>
-              <Typography color='text.primary' className='font-medium'>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <Typography color="text.primary" className="font-medium">
                 {row?.original?.name}
               </Typography>
             </div>
           </div>
-        )
+        ),
       }),
-
-      columnHelper.accessor('business_initial', {
-        header: 'Business Initials',
+      columnHelper.accessor("business_initial", {
+        header: "Business Initials",
         cell: ({ row }) => (
-          <div className='flex items-center gap-4'>
-            <div className='flex flex-col'>
-              <Typography color='text.primary' className='font-medium'>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <Typography color="text.primary" className="font-medium">
                 {row?.original?.business_initial}
               </Typography>
             </div>
           </div>
-        )
+        ),
       }),
-      columnHelper.accessor('currency', {
-        header: 'Currency',
+      columnHelper.accessor("currency", {
+        header: "Currency",
         cell: ({ row }) => (
-          <div className='flex items-center gap-4'>
-            <div className='flex flex-col'>
-              <Typography color='text.primary' className='font-medium'>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <Typography color="text.primary" className="font-medium">
                 {row?.original?.currency?.label}
               </Typography>
             </div>
           </div>
-        )
+        ),
       }),
-      columnHelper.accessor('business_address', {
-        header: 'Business address',
+      columnHelper.accessor("business_address", {
+        header: "Business address",
         cell: ({ row }) => (
-          <div className='flex items-center gap-4'>
-            <div className='flex flex-col'>
-              <Typography color='text.primary' className='font-medium'>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <Typography color="text.primary" className="font-medium">
                 {truncateText(row?.original?.business_address, 15)}
               </Typography>
             </div>
           </div>
-        )
+        ),
       }),
-
-      columnHelper.accessor('contact_number', {
-        header: 'Contact number',
+      columnHelper.accessor("contact_number", {
+        header: "Contact number",
         cell: ({ row }) => (
-          <Typography className='capitalize' color='text.primary'>
+          <Typography className="capitalize" color="text.primary">
             {row?.original?.contact_number}
           </Typography>
-        )
+        ),
       }),
-
-      columnHelper.accessor('action', {
-        header: 'Action',
+      columnHelper.accessor("action", {
+        header: "Action",
         cell: ({ row }) => (
-          <div className='flex items-center'>
-            <IconButton onClick={()=>{
-              setSelectedMenuId(row.original.id)
-              setIsModalOpen(true)
-            }}>
-              <i className='tabler-trash text-[22px] text-textSecondary' />
+          <div className="flex items-center">
+            <IconButton
+              onClick={() => {
+                setSelectedMenuId(row.original.id)
+                setIsModalOpen(true)
+              }}
+            >
+              <i className="tabler-trash text-[22px] text-textSecondary" />
             </IconButton>
-            <div className='flex gap-4 justify-center'>
+            <div className="flex gap-4 justify-center">
               <OpenDialogOnElementClick
                 element={Button}
-                elementProps={buttonProps('Edit', 'primary', 'contained')}
+                elementProps={buttonProps("Edit", "primary", "contained")}
                 dialog={EditBusinessInfo}
                 onTypeAdded={handleTypeAdded}
                 dialogProps={{
-                  data: businessData.find((item: any) => item.id === row?.original?.id)
+                  data: businessData.find((item: any) => item.id === row?.original?.id),
                 }}
               />
             </div>
           </div>
         ),
-        enableSorting: false
-      })
+        enableSorting: false,
+      }),
     ],
-    [data]
+    [locale], // Remove data and businessData from dependencies
   )
 
   const table = useReactTable({
     data: data as BusinessTypeForFile[],
     columns,
     filterFns: {
-      fuzzy: fuzzyFilter
+      fuzzy: fuzzyFilter,
     },
     state: {
       rowSelection,
-      globalFilter
+      globalFilter,
     },
     initialState: {
       pagination: {
-        pageSize: 10
-      }
+        pageSize: 10,
+      },
     },
     enableRowSelection: true,
     globalFilterFn: fuzzyFilter,
@@ -352,64 +383,87 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
     getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues()
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
   })
 
   return (
     <>
       <ConfirmationModal
-                          isOpen={isModalOpen}
-                          onClose={() => setIsModalOpen(false)}
-                          onConfirm={() => selectedMenuId !== null && handleDeleteBusiness(selectedMenuId)}
-                          title="Confirm Action"
-                          message="Are you sure you want to proceed with this action? This cannot be undone."
-                        />
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={() => selectedMenuId !== null && handleDeleteBusiness(selectedMenuId)}
+        title="Confirm Action"
+        message="Are you sure you want to proceed with this action? This cannot be undone."
+      />
       <Card>
-        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <CustomTextField
-            select
-            value={table.getState().pagination.pageSize}
-            onChange={e => table.setPageSize(Number(e.target.value))}
-            className='is-[70px]'
-          >
-            <MenuItem value='10'>10</MenuItem>
-            <MenuItem value='25'>25</MenuItem>
-            <MenuItem value='50'>50</MenuItem>
-          </CustomTextField>
-          <div className='flex flex-col sm:flex-row is-full sm:is-auto items-start sm:items-center gap-4'>
-            <OpenDialogOnElementClick
-              element={Button}
-              elementProps={buttonProps('Add Business', 'primary', 'contained')}
-              dialog={AddBusinessForm}
-              onTypeAdded={handleTypeAdded}
-              dialogProps={
-                {
-                  // data: menuData.find((item: any) => item.id === row.original.id)
-                }
-              }
+        <div className="flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <CustomTextField
+              select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => table.setPageSize(Number(e.target.value))}
+              className="is-[70px]"
+            >
+              <MenuItem value="10">10</MenuItem>
+              <MenuItem value="25">25</MenuItem>
+              <MenuItem value="50">50</MenuItem>
+            </CustomTextField>
+
+            {/* Add Search Input */}
+            <DebouncedInput
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search businesses..."
+              className="min-w-[250px]"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <i className="tabler-search text-textSecondary" />
+                  </InputAdornment>
+                ),
+                endAdornment: (loading || isSearching) && (
+                  <InputAdornment position="end">
+                    <i className="tabler-loader animate-spin text-textSecondary" />
+                  </InputAdornment>
+                ),
+              }}
+              debounce={300} // 300ms debounce for search
             />
           </div>
+
+          {user && Number(user?.user_type) === 1 && (
+            <div className="flex flex-col sm:flex-row is-full sm:is-auto items-start sm:items-center gap-4">
+              <OpenDialogOnElementClick
+                element={Button}
+                elementProps={buttonProps("Add Business", "primary", "contained")}
+                dialog={AddBusinessForm}
+                onTypeAdded={handleTypeAdded}
+                dialogProps={{}}
+              />
+            </div>
+          )}
         </div>
-        <div className='overflow-x-auto'>
+
+        <div className="overflow-x-auto">
           <table className={tableStyles.table}>
             <thead>
-              {table.getHeaderGroups().map(headerGroup => (
+              {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
+                  {headerGroup.headers.map((header) => (
                     <th key={header.id}>
                       {header.isPlaceholder ? null : (
                         <div
                           className={classnames({
-                            'flex items-center': header.column.getIsSorted(),
-                            'cursor-pointer select-none': header.column.getCanSort()
+                            "flex items-center": header.column.getIsSorted(),
+                            "cursor-pointer select-none": header.column.getCanSort(),
                           })}
                           onClick={header.column.getToggleSortingHandler()}
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {{
-                            asc: <i className='tabler-chevron-up text-xl' />,
-                            desc: <i className='tabler-chevron-down text-xl' />
-                          }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
+                            asc: <i className="tabler-chevron-up text-xl" />,
+                            desc: <i className="tabler-chevron-down text-xl" />,
+                          }[header.column.getIsSorted() as "asc" | "desc"] ?? null}
                         </div>
                       )}
                     </th>
@@ -420,17 +474,21 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
             <tbody>
               {table.getFilteredRowModel().rows?.length === 0 ? (
                 <tr>
-                  <td colSpan={table.getVisibleFlatColumns()?.length} className='text-center'>
-                    No data available
+                  <td colSpan={table.getVisibleFlatColumns()?.length} className="text-center">
+                    {loading || isSearching
+                      ? "Loading..."
+                      : searchQuery
+                        ? "No businesses found matching your search"
+                        : "No data available"}
                   </td>
                 </tr>
               ) : (
                 table
                   .getRowModel()
                   .rows.slice(0, table.getState().pagination.pageSize)
-                  .map(row => (
+                  .map((row) => (
                     <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                      {row.getVisibleCells().map(cell => (
+                      {row.getVisibleCells().map((cell) => (
                         <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                       ))}
                     </tr>
@@ -439,6 +497,7 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
             </tbody>
           </table>
         </div>
+
         <TablePagination
           component={() => <TablePaginationComponent table={table} />}
           count={table.getFilteredRowModel()?.rows?.length ?? 0}

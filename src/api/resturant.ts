@@ -3,19 +3,23 @@ import { GET, POST, DELETE, PATCH, GETBYID } from './api'
 import type { ResturantDataType } from './interface/resturantInterface'
 import { ENDPOINTS } from './vars/vars'
 
-export async function getAllResturants(): Promise<any> {
+
+
+export const getAllResturants = async (params?: { search?: string }) => {
   try {
-    // debugger
-    const url = `whatseat/${ENDPOINTS.restaurants}/`
+    let url = `whatseat/${ENDPOINTS.restaurants}/`
+
+    if (params?.search) {
+      const searchParams = new URLSearchParams({ search: params.search })
+      url += `?${searchParams.toString()}`
+    }
+    console.log(url)
     const response = await GET(url)
 
-    return response
-  } catch (error: any) {
-    if (error.response) {
-      throw error.response
-    } else {
-      throw new Error('Error in fetching resturants data')
-    }
+    return response;
+  } catch (error) {
+    console.error("Error fetching restaurants:", error)
+    throw error
   }
 }
 

@@ -6,7 +6,12 @@ const nextConfig = {
   //   domains: ['cdn.pixabay.com']
   // },
   images: {
+    domains: ['images.pexels.com'],
     remotePatterns: [
+      {
+      protocol: 'http', // Allow HTTP explicitly
+      hostname: 'example.com',
+     },
       {
         protocol: 'https',
         hostname: '**'

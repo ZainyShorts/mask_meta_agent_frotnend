@@ -64,7 +64,7 @@ type InvoiceApiResponse = {
 }
 
 type InvoiceData = {
-  stripe_invoice_id: string
+  invoice_id: string
   amount_paid: string
   currency: string
   start_date: string
@@ -217,7 +217,7 @@ const InvoiceListTable = () => {
           </Tooltip>
         ),
       }),
-      columnHelper.accessor("stripe_invoice_id", {
+      columnHelper.accessor("invoice_id", {
         header: "User",
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
@@ -228,7 +228,7 @@ const InvoiceListTable = () => {
               <Typography className="font-medium" color="text.primary">
                 {user?.first_name} {user?.last_name}
               </Typography>
-              <Typography variant="body2">{row.original.stripe_invoice_id}</Typography>
+              <Typography variant="body2">{row.original.invoice_id}</Typography>
             </div>
           </div>
         ),

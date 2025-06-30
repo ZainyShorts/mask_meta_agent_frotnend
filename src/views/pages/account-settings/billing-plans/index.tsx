@@ -939,7 +939,7 @@ const BillingPlans = () => {
         <Address />
       </Grid> */}
       <Grid item xs={12}>
-        <InvoiceListTable invoiceData={db} />
+        <InvoiceListTable  />
       </Grid>
     </Grid>
   )

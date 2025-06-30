@@ -4,6 +4,7 @@ export function getBaseUrl(): string {
 }
 
 export const ENDPOINTS = {
+  import_csv: 'import-csv',
   paypal_confirm_subscription: 'paypal_confirm_subscription',
   renewSubscription: 'renew-subscription',
   cancelSubscription: 'cancel-subscription',

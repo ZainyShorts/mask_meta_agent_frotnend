@@ -1,6 +1,7 @@
 'use client'
 
 import { ENDPOINTS, getBaseUrl } from "@/api/vars/vars";
+import { useAuthStore } from "@/store/authStore";
 import { PayPalScriptProvider, PayPalButtons, FUNDING } from "@paypal/react-paypal-js";
 
 interface PayPalSubscribeButtonProps {
@@ -9,6 +10,7 @@ interface PayPalSubscribeButtonProps {
 }
 
 const PayPalSubscribeButton = ({ handleStripePayment, userEmail }: PayPalSubscribeButtonProps) => {
+   const { clearAuth } = useAuthStore()
   const createSubscription = async () => {
     const res = await fetch(`${getBaseUrl()}account/${ENDPOINTS.paypal_confirm_subscription}/`, {
       method: "POST",
@@ -57,13 +59,12 @@ const PayPalSubscribeButton = ({ handleStripePayment, userEmail }: PayPalSubscri
               fundingSource={FUNDING.PAYPAL}
               style={{ layout: "horizontal", height: 48 }}
               createSubscription={createSubscription}
-            />
-          </div>
-          <div className="h-[48px] min-w-[140px]">
-            <PayPalButtons
-              fundingSource={FUNDING.CREDIT}
-              style={{ layout: "horizontal", height: 48 }}
-              createSubscription={createSubscription}
+              onApprove={async() => {
+                window.location.href = '/en/login';
+                localStorage.removeItem('auth_token')
+                 clearAuth()
+                return
+              }}
             />
           </div>
           <div className="h-[48px] min-w-[140px]">
@@ -73,9 +74,24 @@ const PayPalSubscribeButton = ({ handleStripePayment, userEmail }: PayPalSubscri
               createSubscription={createSubscription}
               onApprove={async() => {
                 window.location.href = '/en/login';
+                localStorage.removeItem('auth_token')
+                clearAuth()
                 return
               }}
             /> 
+          </div>
+          <div className="h-[48px] min-w-[140px]">
+            <PayPalButtons
+              fundingSource={FUNDING.CREDIT}
+              style={{ layout: "horizontal", height: 48 }}
+              createSubscription={createSubscription}
+              onApprove={async() => {
+                window.location.href = '/en/login';
+                localStorage.removeItem('auth_token')
+                clearAuth()
+                return
+              }}
+            />
           </div>
         </div>
       </div>
