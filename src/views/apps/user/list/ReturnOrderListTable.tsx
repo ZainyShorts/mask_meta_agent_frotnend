@@ -127,6 +127,7 @@ const ReturnOrderListTable = ({ tableData }: { tableData?: OrderReturnDataType[]
   const [deleteOrderReturnOpen, setDeleteOrderReturnOpen] = useState(false)
   const { returnOrderData, returnOrderAction } = useAuthStore()
   const [editReturnFlag, setEditReturnFlag] = useState(false)
+  const { user } = useAuthStore()
 
   // const [data, setData] = useState(tableData || [])
   const [data, setData] = useState<OrderReturnDataType[]>(tableData || [])
@@ -366,6 +367,7 @@ const ReturnOrderListTable = ({ tableData }: { tableData?: OrderReturnDataType[]
               className='is-full sm:is-auto'
             /> */}
 
+            {user && Number(user?.user_type) === 1 && (
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
@@ -375,6 +377,7 @@ const ReturnOrderListTable = ({ tableData }: { tableData?: OrderReturnDataType[]
             >
               Add Return
             </Button>
+         )}
           </div>
         </div>
         <div className='overflow-x-auto'>

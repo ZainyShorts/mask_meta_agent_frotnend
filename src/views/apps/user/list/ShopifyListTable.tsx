@@ -17,7 +17,9 @@ import { styled } from "@mui/material/styles"
 import TablePagination from "@mui/material/TablePagination"
 import type { TextFieldProps } from "@mui/material/TextField"
 import MenuItem from "@mui/material/MenuItem"
-import InputAdornment from "@mui/material/InputAdornment"
+import Tooltip from "@mui/material/Tooltip"
+import Snackbar from "@mui/material/Snackbar"
+import Alert from "@mui/material/Alert"
 
 // Third-party Imports
 import classnames from "classnames"
@@ -45,16 +47,31 @@ import type { ThemeColor } from "@core/types"
 import TablePaginationComponent from "@components/TablePaginationComponent"
 import CustomTextField from "@core/components/mui/TextField"
 import tableStyles from "@core/styles/table.module.css"
-import type { BusinessTypeForFile } from "@/types/apps/businessTypes"
-import { deleteBusiness, getAllBusiness } from "@/api/business"
-import EditBusinessInfo from "@/components/dialogs/edit-business-info"
-import { useAuthStore } from "@/store/authStore"
 import OpenDialogOnElementClick from "@/components/dialogs/OpenDialogOnElementClick"
 import type { ButtonProps } from "@mui/material/Button"
 import { getLocalizedUrl } from "@/utils/i18n"
 import type { Locale } from "@/configs/i18n"
-import AddBusinessForm from "@/components/dialogs/add-business-form"
 import ConfirmationModal from "@/components/dialogs/confirm-modal"
+import EditShopifyInfo from "@/components/dialogs/edit-shopify-info"
+import AddShopifyForm from "@/components/dialogs/add-shopify-form"
+
+// API Imports - Updated to match your API functions
+import { deleteStore, getAllShopify } from "@/api/shopify" // Updated import
+
+// Types
+export interface ShopifyAccount {
+  id: number
+  user: number
+  admin_access_token: string
+  shopify_domain_url: string
+  shopify_version: string
+  created_at: string
+  updated_at: string
+}
+
+type ShopifyAccountWithAction = ShopifyAccount & {
+  action?: string
+}
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -63,10 +80,6 @@ declare module "@tanstack/table-core" {
   interface FilterMeta {
     itemRank: RankingInfo
   }
-}
-
-type BusinessTypeWithAction = BusinessTypeForFile & {
-  action?: string
 }
 
 // Styled Components
@@ -100,7 +113,6 @@ const DebouncedInput = ({
     const timeout = setTimeout(() => {
       onChange(value)
     }, debounce)
-
     return () => clearTimeout(timeout)
   }, [value, debounce, onChange])
 
@@ -114,111 +126,96 @@ const buttonProps = (children: string, color: ThemeColor, variant: ButtonProps["
 })
 
 // Column Definitions
-const columnHelper = createColumnHelper<BusinessTypeWithAction>()
+const columnHelper = createColumnHelper<ShopifyAccountWithAction>()
 
-const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] }) => {
+const ShopifyListTable = ({ tableData }: { tableData?: ShopifyAccount[] }) => {
   const router = useRouter()
   const { lang: locale } = useParams()
   const [rowSelection, setRowSelection] = useState({})
-  const { businessAction, businessData } = useAuthStore()
-  const [editBusinessFlag, setEditBusinessFlag] = useState<boolean>(false)
-  const [deleteBusinessOpen, setDeleteBusinessOpen] = useState(false)
+  const [editShopifyFlag, setEditShopifyFlag] = useState<boolean>(false)
+  const [deleteShopifyOpen, setDeleteShopifyOpen] = useState(false)
   const [loading, setLoading] = useState<boolean>(false)
-  const [data, setData] = useState<BusinessTypeForFile[]>(tableData || [])
+  const [data, setData] = useState<ShopifyAccount[]>(tableData || [])
   const [globalFilter, setGlobalFilter] = useState("")
+  const [webhookCopied, setWebhookCopied] = useState(false)
 
-  // Add search state
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
-
-  //confirmation modal for delete
+  // Confirmation modal for delete
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null)
-  const { user } = useAuthStore()
 
-  // Updated fetchBusiness function to accept search parameter
-  const fetchBusiness = useCallback(
-    async (search?: string) => {
-      try {
-        setLoading(true)
-        if (search) {
-          setIsSearching(true)
-        }
-
-        // Modify your API call to include search parameter
-        const response = await getAllBusiness(search ? { search } : undefined)
-
-        const newData = response?.data?.results || []
-        setData(newData)
-
-        // Only call businessAction if data actually changed
-        if (JSON.stringify(newData) !== JSON.stringify(businessData)) {
-          businessAction(newData)
-        }
-      } catch (err: any) {
-        // toast.error(err.message || "Failed to fetch businesses")
-        console.log(err.message)
-      } finally {
-        setLoading(false)
-        setIsSearching(false)
-      }
-    },
-    [], // Remove businessAction from dependencies to prevent infinite loops
-  )
+  const fetchShopify = useCallback(async () => {
+    try {
+      setLoading(true)
+      const response = await getAllShopify()
+      console.log("API Response:", response)
+      const newData = response?.data?.results || response?.results || response?.data || []
+      setData(newData)
+    } catch (err: any) {
+      console.error("Error fetching Shopify accounts:", err)
+      // toast.error(err.message || "Failed to fetch Shopify accounts")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   // Initial fetch - only run once on mount
   useEffect(() => {
-    fetchBusiness()
-  }, []) // Empty dependency array
+    fetchShopify()
+  }, [fetchShopify])
 
   // Handle delete/edit operations
   useEffect(() => {
-    if (deleteBusinessOpen || editBusinessFlag) {
-      fetchBusiness(searchQuery || undefined)
+    if (deleteShopifyOpen || editShopifyFlag) {
+      fetchShopify()
       // Reset flags after fetch
-      if (editBusinessFlag) setEditBusinessFlag(false)
+      if (editShopifyFlag) setEditShopifyFlag(false)
     }
-  }, [deleteBusinessOpen, editBusinessFlag])
-
-  // Handle search query changes with debouncing
-  const handleSearchChange = useCallback(
-    (value: string | number) => {
-      const searchValue = value.toString().trim()
-      setSearchQuery(searchValue)
-
-      // Only fetch when there's a search term with at least 2 characters
-      if (searchValue.length >= 2) {
-        fetchBusiness(searchValue)
-      } else if (searchValue.length === 0) {
-        // Fetch all businesses when search is completely cleared
-        fetchBusiness()
-      }
-    },
-    [fetchBusiness],
-  )
+  }, [deleteShopifyOpen, editShopifyFlag, fetchShopify])
 
   const handleTypeAdded = useCallback(() => {
-    fetchBusiness(searchQuery || undefined)
-    setEditBusinessFlag(true)
-  }, [fetchBusiness, searchQuery])
+    fetchShopify()
+    setEditShopifyFlag(true)
+  }, [fetchShopify])
 
-  const handleDeleteBusiness = (id: number) => {
-    setLoading(true)
-    deleteBusiness(id.toString())
-      .then((res) => {
-        toast.success("Business deleted successfully")
-        setDeleteBusinessOpen(true)
-      })
-      .catch((error) => {
-        if (error?.data && error?.data?.detail) {
-          toast.error(error?.data?.detail)
-        } else {
-          toast.error("Error in deleting business")
-        }
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+  // Updated delete function to use deleteStore
+  const handleDeleteShopify = async (id: number) => {
+    try {
+      setLoading(true)
+      console.log("Deleting store with ID:", id)
+      const response = await deleteStore(id.toString())
+      console.log("Delete response:", response)
+      toast.success("Shopify account deleted successfully")
+      setDeleteShopifyOpen(true)
+      setIsModalOpen(false)
+      setSelectedMenuId(null)
+      // Refresh the data
+      fetchShopify()
+    } catch (error: any) {
+      console.error("Error deleting store:", error)
+      let errorMessage = "Error in deleting Shopify account"
+      if (error?.data?.detail) {
+        errorMessage = error.data.detail
+      } else if (error?.data?.message) {
+        errorMessage = error.data.message
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+      toast.error(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCopyWebhookUrl = async () => {
+    const webhookUrl = `https://kosmos.themaskchat.com/api/whatseat/shopify_webhook/<meta_business_id>/`
+    try {
+      await navigator.clipboard.writeText(webhookUrl)
+      setWebhookCopied(true)
+      // toast.success("Webhook URL copied to clipboard!")
+    } catch (err) {
+      console.error("Failed to copy webhook URL:", err)
+      toast.error("Failed to copy webhook URL")
+    }
   }
 
   const truncateText = (text: any, maxLength: any) => {
@@ -226,7 +223,17 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
     return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
   }
 
-  const columns = useMemo<ColumnDef<BusinessTypeWithAction, any>[]>(
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
+  const columns = useMemo<ColumnDef<ShopifyAccountWithAction, any>[]>(
     () => [
       {
         id: "select",
@@ -255,112 +262,104 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
         cell: ({ row }) => (
           <Typography
             component={Link}
-            href={getLocalizedUrl(`/business/${row.original.id}`, locale as Locale)}
+            href={getLocalizedUrl(`/shopify/${row.original.id}`, locale as Locale)}
             color="primary"
-          >{`${row.original.id}`}</Typography>
+          >
+            {`${row.original.id}`}
+          </Typography>
         ),
       }),
-      columnHelper.accessor("business_id", {
-        header: "Business Meta Id",
+      columnHelper.accessor("shopify_domain_url", {
+        header: "Domain URL",
         cell: ({ row }) => (
           <div className="flex items-center gap-4">
             <div className="flex flex-col">
               <Typography color="text.primary" className="font-medium">
-                {row?.original?.business_id}
+                <Link href={row?.original?.shopify_domain_url} target="_blank" rel="noopener noreferrer">
+                  {truncateText(row?.original?.shopify_domain_url, 30)}
+                </Link>
               </Typography>
             </div>
           </div>
         ),
       }),
-      columnHelper.accessor("name", {
-        header: "Business Name",
+      columnHelper.accessor("admin_access_token", {
+        header: "Access Token",
         cell: ({ row }) => (
           <div className="flex items-center gap-4">
             <div className="flex flex-col">
-              <Typography color="text.primary" className="font-medium">
-                {row?.original?.name}
+              <Typography color="text.primary" className="font-medium font-mono text-sm">
+                {truncateText(row?.original?.admin_access_token, 20)}
               </Typography>
             </div>
           </div>
         ),
       }),
-      columnHelper.accessor("business_initial", {
-        header: "Business Initials",
+      columnHelper.accessor("shopify_version", {
+        header: "Version",
         cell: ({ row }) => (
           <div className="flex items-center gap-4">
             <div className="flex flex-col">
               <Typography color="text.primary" className="font-medium">
-                {row?.original?.business_initial}
+                {row?.original?.shopify_version}
               </Typography>
             </div>
           </div>
         ),
       }),
-      columnHelper.accessor("currency", {
-        header: "Currency",
+      columnHelper.accessor("created_at", {
+        header: "Created At",
         cell: ({ row }) => (
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col">
-              <Typography color="text.primary" className="font-medium">
-                {row?.original?.currency?.label}
-              </Typography>
-            </div>
-          </div>
+          <Typography className="text-sm" color="text.secondary">
+            {formatDate(row?.original?.created_at)}
+          </Typography>
         ),
       }),
-      columnHelper.accessor("business_address", {
-        header: "Business address",
+      columnHelper.accessor("updated_at", {
+        header: "Updated At",
         cell: ({ row }) => (
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col">
-              <Typography color="text.primary" className="font-medium">
-                {truncateText(row?.original?.business_address, 15)}
-              </Typography>
-            </div>
-          </div>
-        ),
-      }),
-      columnHelper.accessor("contact_number", {
-        header: "Contact number",
-        cell: ({ row }) => (
-          <Typography className="capitalize" color="text.primary">
-            {row?.original?.contact_number}
+          <Typography className="text-sm" color="text.secondary">
+            {formatDate(row?.original?.updated_at)}
           </Typography>
         ),
       }),
       columnHelper.accessor("action", {
         header: "Action",
         cell: ({ row }) => (
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            <Tooltip title="Copy Webhook URL">
+              <IconButton onClick={handleCopyWebhookUrl} disabled={loading} size="small">
+                <i className="tabler-webhook text-[22px] text-textSecondary" />
+              </IconButton>
+            </Tooltip>
             <IconButton
               onClick={() => {
                 setSelectedMenuId(row.original.id)
                 setIsModalOpen(true)
               }}
+              disabled={loading}
             >
               <i className="tabler-trash text-[22px] text-textSecondary" />
             </IconButton>
-            <div className="flex gap-4 justify-center">
-              <OpenDialogOnElementClick
-                element={Button}
-                elementProps={buttonProps("Edit", "primary", "contained")}
-                dialog={EditBusinessInfo}
-                onTypeAdded={handleTypeAdded}
-                dialogProps={{
-                  data: businessData.find((item: any) => item.id === row?.original?.id),
-                }}
-              />
-            </div>
+            <OpenDialogOnElementClick
+              element={Button}
+              elementProps={buttonProps("Edit", "primary", "contained")}
+              dialog={EditShopifyInfo}
+              onTypeAdded={handleTypeAdded}
+              dialogProps={{
+                data: data.find((item: any) => item.id === row?.original?.id),
+              }}
+            />
           </div>
         ),
         enableSorting: false,
       }),
     ],
-    [locale], // Remove data and businessData from dependencies
+    [locale, data, handleTypeAdded, loading],
   )
 
   const table = useReactTable({
-    data: data as BusinessTypeForFile[],
+    data: data as ShopifyAccount[],
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -391,10 +390,13 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
     <>
       <ConfirmationModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={() => selectedMenuId !== null && handleDeleteBusiness(selectedMenuId)}
-        title="Confirm Action"
-        message="Are you sure you want to proceed with this action? This cannot be undone."
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedMenuId(null)
+        }}
+        onConfirm={() => selectedMenuId !== null && handleDeleteShopify(selectedMenuId)}
+        title="Delete Shopify Account"
+        message="Are you sure you want to delete this Shopify account? This action cannot be undone."
       />
       <Card>
         <div className="flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4">
@@ -405,51 +407,26 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
               onChange={(e) => table.setPageSize(Number(e.target.value))}
               className="is-[70px]"
             >
-              <MenuItem value="10">10</MenuItem>
-              <MenuItem value="25">25</MenuItem>
-              <MenuItem value="50">50</MenuItem>
+              <MenuItem value={10}>10</MenuItem>
+              <MenuItem value={25}>25</MenuItem>
+              <MenuItem value={50}>50</MenuItem>
             </CustomTextField>
-
-            {/* Add Search Input */}
-            <DebouncedInput
-              value={searchQuery}
-              onChange={handleSearchChange}
-              placeholder="Search businesses..."
-              className="min-w-[250px]"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <i className="tabler-search text-textSecondary" />
-                  </InputAdornment>
-                ),
-                endAdornment: (loading || isSearching) && (
-                  <InputAdornment position="end">
-                    <i className="tabler-loader animate-spin text-textSecondary" />
-                  </InputAdornment>
-                ),
-              }}
-              debounce={300} // 300ms debounce for search
-            />
           </div>
 
-          {user && Number(user?.user_type) === 1 && (
-            <div className="flex flex-col sm:flex-row is-full sm:is-auto items-start sm:items-center gap-4">
-              <OpenDialogOnElementClick
-                element={Button}
-                // elementProps={buttonProps("Add Business", "primary", "contained")}
-                elementProps={{
-                ...buttonProps("Add Business", "primary", "contained"),
-                disabled: table && table.getFilteredRowModel().rows.length > 0,
-                }}
-                dialog={AddBusinessForm}
-                onTypeAdded={handleTypeAdded}
-                dialogProps={{}}
-              />
-            </div>
-          )}
-          
+          <div className='flex flex-col sm:flex-row is-full sm:is-auto items-start sm:items-center gap-4'>
+            <OpenDialogOnElementClick
+              element={Button}
+              elementProps={{
+                ...buttonProps("Add Shopify Account", "primary", "contained"),
+                disabled: data && data.length > 0,
+              }}
+              dialog={AddShopifyForm}
+              onTypeAdded={handleTypeAdded}
+              dialogProps={{}}
+            />
+          </div>
+        
         </div>
-
         <div className="overflow-x-auto">
           <table className={tableStyles.table}>
             <thead>
@@ -478,32 +455,19 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
               ))}
             </thead>
             <tbody>
-              {table.getFilteredRowModel().rows?.length === 0 ? (
-                <tr>
-                  <td colSpan={table.getVisibleFlatColumns()?.length} className="text-center">
-                    {loading || isSearching
-                      ? "Loading..."
-                      : searchQuery
-                        ? "No businesses found matching your search"
-                        : "No data available"}
-                  </td>
-                </tr>
-              ) : (
-                table
-                  .getRowModel()
-                  .rows.slice(0, table.getState().pagination.pageSize)
-                  .map((row) => (
-                    <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                      ))}
-                    </tr>
-                  ))
-              )}
+              {table
+                .getRowModel()
+                .rows.slice(0, table.getState().pagination.pageSize)
+                .map((row) => (
+                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                    ))}
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
-
         <TablePagination
           component={() => <TablePaginationComponent table={table} />}
           count={table.getFilteredRowModel()?.rows?.length ?? 0}
@@ -514,8 +478,18 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
           }}
         />
       </Card>
+      <Snackbar
+        open={webhookCopied}
+        autoHideDuration={3000}
+        onClose={() => setWebhookCopied(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert onClose={() => setWebhookCopied(false)} severity="success">
+          Webhook URL copied to clipboard!
+        </Alert>
+      </Snackbar>
     </>
   )
 }
 
-export default BusinessListTable
+export default ShopifyListTable

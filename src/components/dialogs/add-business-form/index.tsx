@@ -84,6 +84,8 @@ const AddBusinessForm = (
     formData.append('contact_number', data.contact_number)
     formData.append('business_initial', data.business_initial)
     formData.append('currency', data.currency)
+    formData.append('business_email',data.business_email)
+    formData.append('app_code',data.app_code)
 
     if (user && user?.user_type === 'admin') {
       formData.append('user', data?.user)
@@ -137,7 +139,7 @@ const AddBusinessForm = (
         const businessResponse = await getAllBusiness()
 
         const currencyResponce = await getAllCurrencies()
-        setCurrencyData(currencyResponce?.data?.results || [])
+        setCurrencyData(currencyResponce?.data?.data || [])
         setBusinessData(businessResponse?.data?.results || [])
       } catch (err: any) {
         // setError(err.message || 'Failed to fetch users')
@@ -168,174 +170,193 @@ const AddBusinessForm = (
   }, [])
 
   return (
-    <Dialog fullWidth open={open} maxWidth='md' scroll='body' sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}>
-      <DialogCloseButton onClick={() => setOpen(false)} disableRipple>
-        <i className='tabler-x' />
-      </DialogCloseButton>
+  <Dialog fullWidth open={open} maxWidth='md' scroll='body' sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}>
+    <DialogCloseButton onClick={() => setOpen(false)} disableRipple>
+      <i className='tabler-x' />
+    </DialogCloseButton>
 
-      <DialogTitle variant='h4' className='flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'>
-        Add Business Information
-      </DialogTitle>
-      <div>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
-            <Grid container spacing={5} alignItems='center'>
-              <Grid item xs={12} sm={6}>
-                <CustomTextField
-                  label='Business Name *'
-                  fullWidth
-                  placeholder='Enter Business Name'
-                  {...register('name', { required: 'Business Name is required' })}
-                  error={!!errors.name}
-                  helperText={errors.name?.message}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <CustomTextField
-                  label='Business Meta Id *'
-                  fullWidth
-                  placeholder='Enter business Meta Id'
-                  {...register('business_id', { required: 'Business Meta Id is required' })}
-                  error={!!errors.business_id}
-                  helperText={errors.business_id?.message}
-                />
-              </Grid>
+    <DialogTitle variant='h4' className='flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'>
+      Add Business Information
+    </DialogTitle>
+    <div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
+          <Grid container spacing={5} alignItems='center'>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label='Business Name *'
+                fullWidth
+                placeholder='Enter business name'
+                {...register('name', { required: 'Business name is required' })}
+                error={!!errors.name}
+                helperText={errors.name?.message}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label='Business Meta ID *'
+                fullWidth
+                placeholder='Enter business Meta ID'
+                {...register('business_id', { required: 'Business Meta ID is required' })}
+                error={!!errors.business_id}
+                helperText={errors.business_id?.message}
+              />
+            </Grid>
 
-              <Grid item xs={12}>
-                <CustomTextField
-                  label='Business description *'
-                  fullWidth
-                  placeholder='Enter business description'
-                  {...register('business_desc', { required: 'Business description is required' })}
-                  error={!!errors.business_desc}
-                  helperText={errors.business_desc?.message}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <CustomTextField
-                  label='Business address *'
-                  fullWidth
-                  placeholder='Enter business address '
-                  {...register('business_address', { required: 'Business address is required' })}
-                  error={!!errors.business_address}
-                  helperText={errors.business_address?.message}
-                />
-              </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                label='Business Description *'
+                fullWidth
+                placeholder='Enter business description'
+                {...register('business_desc', { required: 'Business description is required' })}
+                error={!!errors.business_desc}
+                helperText={errors.business_desc?.message}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label='Business Address *'
+                fullWidth
+                placeholder='Enter business address'
+                {...register('business_address', { required: 'Business address is required' })}
+                error={!!errors.business_address}
+                helperText={errors.business_address?.message}
+              />
+            </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <CustomTextField
-                  type='file' // Input type as 'file'
-                  label='Business Logo *'
-                  fullWidth
-                  inputProps={{
-                    accept: '*' // Accept any file type
-                  }}
-                  {...register(
-                    'logo'
-                    // { required: 'Business Logo is required' }
-                  )}
-                  // error={!!errors.logo}
-                  // helperText={errors.logo?.message}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <CustomTextField
-                  type='file' // Input type as 'file'
-                  label='Business Document *'
-                  fullWidth
-                  inputProps={{
-                    accept: '*' // Accept any file type
-                  }}
-                  {...register('business_doc', { required: 'Business document is required' })}
-                  error={!!errors.business_doc}
-                  helperText={errors.business_doc?.message}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <CustomTextField
-                  fullWidth
-                  label='Business Initial *'
-                  placeholder='Enter business Initial'
-                  {...register('business_initial', {
-                    required: 'Business initial is required',
-                    pattern: {
-                      value: /^[A-Z]{1,5}$/,
-                      message: 'Only up to 5 capital letters are allowed'
-                    }
-                  })}
-                  error={!!errors.business_initial}
-                  helperText={errors.business_initial?.message}
-                />
-              </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                type='file'
+                label='Business Logo *'
+                fullWidth
+                inputProps={{ accept: '*' }}
+                {...register('logo')}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                type='file'
+                label='Business Document *'
+                fullWidth
+                inputProps={{ accept: '*' }}
+                {...register('business_doc', { required: 'Business document is required' })}
+                error={!!errors.business_doc}
+                helperText={errors.business_doc?.message}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                fullWidth
+                label='Business Initial *'
+                placeholder='Enter business initial'
+                {...register('business_initial', {
+                  required: 'Business initial is required',
+                  pattern: {
+                    value: /^[A-Z]{1,5}$/,
+                    message: 'Only up to 5 capital letters are allowed'
+                  }
+                })}
+                error={!!errors.business_initial}
+                helperText={errors.business_initial?.message}
+              />
+            </Grid>
 
-              <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label='Business Email *'
+                fullWidth
+                placeholder='Enter business email'
+                {...register('business_email', { required: 'Business email is required' })}
+                error={!!errors.business_email}
+                helperText={errors.business_email?.message}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label='App Code *'
+                fullWidth
+                placeholder='Enter your app code'
+                {...register('app_code', { required: 'App code is required' })}
+                error={!!errors.app_code}
+                helperText={errors.app_code?.message}
+              />
+            </Grid>
+
+            
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                select
+                fullWidth
+                id='currency'
+                label='Select Currency *'
+                inputProps={{ placeholder: 'Currency', ...register('currency') }}
+                error={!!errors.currency}
+                helperText={errors.currency?.message}
+              >
+                {currencyData.map((item: any) => (
+                  <MenuItem key={item?.id} value={item?.id}>
+                    {item?.label}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label='Contact Number *'
+                fullWidth
+                placeholder='Enter contact number'
+                {...register('contact_number', { required: 'Contact number is required' })}
+                error={!!errors.contact_number}
+                helperText={errors.contact_number?.message}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              {user && user?.user_type === 'admin' && (
                 <CustomTextField
                   select
                   fullWidth
-                  id='currency'
-                  label='Select Currency *'
-                  inputProps={{ placeholder: 'Currency', ...register('currency') }}
-                  error={!!errors.currency}
-                  helperText={errors.currency?.message}
+                  id='user'
+                  label='Select User *'
+                  inputProps={{ placeholder: 'User', ...register('user') }}
+                  error={!!errors.user}
+                  helperText={errors.user?.message}
                 >
-                  {currencyData &&
-                    currencyData.map((item: any) => (
-                      <MenuItem key={item?.id} value={item?.id}>
-                        {item?.label}
-                      </MenuItem>
-                    ))}
+                  {userData.map((item: any) => (
+                    <MenuItem key={item?.id} value={item?.id}>
+                      {item?.first_name}
+                    </MenuItem>
+                  ))}
                 </CustomTextField>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <CustomTextField
-                  label='Contact number *'
-                  fullWidth
-                  placeholder='Enter contact number'
-                  {...register('contact_number', { required: 'contact number is required' })}
-                  error={!!errors.contact_number}
-                  helperText={errors.contact_number?.message}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                {user && user?.user_type === 'admin' && (
-                  <CustomTextField
-                    select
-                    fullWidth
-                    id='user'
-                    label='Select user *'
-                    inputProps={{ placeholder: 'User', ...register('user') }}
-                    error={!!errors.user}
-                    helperText={errors.user?.message}
-                  >
-                    {userData &&
-                      userData.map((item: any) => (
-                        <MenuItem key={item?.id} value={item?.id}>
-                          {item?.first_name}
-                        </MenuItem>
-                      ))}
-                  </CustomTextField>
-                )}
-              </Grid>
+              )}
             </Grid>
-            <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16 mt-5'>
-              <Button variant='contained' type='submit' disabled={loading}>
-                Submit
-              </Button>
-              <Button variant='tonal' color='error' type='reset' onClick={() => handleReset()}>
-                Cancel
-              </Button>
-            </DialogActions>
+            
 
-            {loading && <Loader />}
-          </DialogContent>
-        </form>
+            
 
-        <Toaster />
-      </div>
-    </Dialog>
-  )
+            
+
+            
+          </Grid>
+
+          <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16 mt-5'>
+            <Button variant='contained' type='submit' disabled={loading}>
+              Submit
+            </Button>
+            <Button variant='tonal' color='error' type='reset' onClick={handleReset}>
+              Cancel
+            </Button>
+          </DialogActions>
+
+          {loading && <Loader />}
+        </DialogContent>
+      </form>
+
+      {/* <Toaster /> */}
+    </div>
+  </Dialog>
+)
+
 }
 
 export default AddBusinessForm

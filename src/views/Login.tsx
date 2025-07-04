@@ -773,7 +773,14 @@ const Login = ({ mode }: { mode: SystemMode }) => {
       if (data.user.subscription === false) {
         router.push(getLocalizedUrl("/account-settings", locale))
       } else {
-        router.push(getLocalizedUrl("/home", locale))
+        if(Number(user?.user_type) === 1){
+          router.push(getLocalizedUrl("/home", locale))
+        }
+        else if(Number(user?.user_type) === 2){
+          router.push(getLocalizedUrl("/users", locale))
+        }else{
+           router.push(getLocalizedUrl("/menu", locale))
+        }
       }
     } catch (error: any) {
       // Error handling

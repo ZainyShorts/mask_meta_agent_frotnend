@@ -19,6 +19,8 @@ export interface BusinessDataTypeForAddBusiness {
   created_at: Date
   updated_at: Date
   business_initial: string
+  app_code: string
+  business_email: string
   name: string
   logo?: FileList
   currency: CurrencyObject

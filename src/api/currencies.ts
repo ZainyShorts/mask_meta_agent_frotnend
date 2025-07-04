@@ -5,6 +5,7 @@ export async function getAllCurrencies(): Promise<any> {
   try {
     const url = `whatseat/${ENDPOINTS.currencies}/`
     const response = await GET(url)
+    console.log('currencies res', response)
     return response
   } catch (error: any) {
     if (error.response) {

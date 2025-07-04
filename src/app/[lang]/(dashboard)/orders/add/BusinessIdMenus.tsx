@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { Tabs, Tab, Box, Typography, Button, Card, IconButton, MenuItem, Divider } from '@mui/material'
 import { ToppingDataType } from '@/api/interface/toppingInterface'
 import { getAllFoodTypes, getAllFoodTypesOfSpecificBusiness } from '@/api/foodTypes'
-import { getAllMenues } from '@/api/menu'
+import { getAllMenuesByBusinessId, getAllMenues } from '@/api/menu'
 import { MenuDataType } from '@/api/interface/menuIterface'
 import MenuCard from './MenuCard'
 import CustomTextField from '@/@core/components/mui/TextField'
@@ -67,7 +67,7 @@ const OrderMenuBar = () => {
         setRestoData(restos)
       } catch (err: any) {
         console.error('Error fetching businesses:', err)
-        toast.error(err.message || 'Failed to fetch businesses')
+        // toast.error(err.message || 'Failed to fetch businesses')
       }
     }
 
@@ -115,10 +115,12 @@ const OrderMenuBar = () => {
       const response = await getAllFoodTypesOfSpecificBusiness(selectedBusinessId)
 
       const results = response?.data
+      console.log(response, 'fetchFoodTypesUsingBusinessId')
       setFoodTypeData(results)
 
-      const menuData = await getAllMenues()
+      const menuData = await getAllMenuesByBusinessId(selectedBusinessId.toString())
       const menuResults: MenuDataType[] = menuData?.data?.results
+      console.log('fod---- types', menuResults)
       setAllMenus(menuResults)
 
       if (results?.length > 0) {

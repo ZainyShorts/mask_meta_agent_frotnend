@@ -45,7 +45,7 @@ import type { ButtonProps } from "@mui/material/Button"
 import { useAuthStore } from "@/store/authStore"
 import type { BusinessType } from "@/types/apps/businessTypes"
 import { getAllBusiness } from "@/api/business"
-import { createTemplate, createFlow, deleteMenu, getAllMenues, syncMenuData } from "@/api/menu"
+import { createTemplate, createFlow, deleteMenu, getAllMenuesByBusinessId, syncMenuData } from "@/api/menu"
 import { getLocalizedUrl } from "@/utils/i18n"
 import type { Locale } from "@/configs/i18n"
 import AddtMenuForm from "@/components/dialogs/add-menu-form"
@@ -144,8 +144,9 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
       try {
         // Assuming the API supports filtering by business_id
         // If not, you may need to modify the API endpoint
-        const response = await getAllMenues({ business_id: businessId })
-        const menus = response?.data?.results || []
+        console.log('businessId',businessId)
+        const response = await getAllMenuesByBusinessId(businessId.toString())
+        const menus = response || []
         console.log(menus)
         setData(menus) // Directly set filtered data
         menuAction(menus)
@@ -165,7 +166,8 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
       // Remove auto-selection of first business
       // User must manually select a business
     } catch (err: any) {
-      toast.error(err.message || "Failed to fetch businesses")
+      // toast.error(err.message || "Failed to fetch businesses")
+      console.log(err.message)
     }
   }, [])
 
@@ -305,7 +307,7 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
       const payload = {
         name: `${menuItems.sku}_${menuItems.type.name}_flow2`,
         categories: ["OTHER"],
-        flow_type: "combination",
+        flow_type: "toppings",
         type_id: menuItems.type.id,
         menu_id: menuItems.id,
         business_id: selectedBusiness,
@@ -455,7 +457,7 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
         header: "Price",
         cell: ({ row }) => (
           <Typography className="capitalize" color="text.primary">
-            <strong>${row.original.price}</strong>
+            <strong>{row.original.price}</strong>
           </Typography>
         ),
       }),
@@ -588,7 +590,7 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
                 </MenuItem>
               )}
             </CustomTextField>
-            {user && Number(user?.user_type) === 1 && (
+            {user && Number(user?.user_type) !== 2 && (
               <>
                 <OpenDialogOnElementClick
                   element={Button}

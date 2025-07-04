@@ -10,7 +10,7 @@ interface MenuCardProps {
 }
 
 const MenuCard: React.FC<MenuCardProps> = ({ product, onAdd }) => {
-  console.log(product, 'product')
+  
 
   return (
     <Card

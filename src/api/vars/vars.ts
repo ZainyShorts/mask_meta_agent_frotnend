@@ -52,5 +52,6 @@ export const ENDPOINTS = {
   createTemplate: 'create-template',
   facebookTemplates: 'facebook-templates/by-business',
   facebookFlows: 'facebook-flows/by-business',
-  currencies: 'currencies'
+  currencies: 'currencies',
+  shopify: 'shopify'
 }

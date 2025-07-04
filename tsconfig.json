@@ -63,7 +63,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/components/dialogs/edit-shopify-info"  ],
   "exclude": [
     "node_modules"
   ]

@@ -245,7 +245,7 @@ const EditMenuInfo = ({ open, setOpen, data, onTypeAdded }: EditMenuInfoProps) =
                 helperText={errors.image_link?.message}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <CustomTextField
                 select
                 fullWidth
@@ -264,7 +264,7 @@ const EditMenuInfo = ({ open, setOpen, data, onTypeAdded }: EditMenuInfoProps) =
                     </MenuItem>
                   ))}
               </CustomTextField>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 select
@@ -299,7 +299,7 @@ const EditMenuInfo = ({ open, setOpen, data, onTypeAdded }: EditMenuInfoProps) =
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <CustomTextField
                 select
                 fullWidth
@@ -315,7 +315,7 @@ const EditMenuInfo = ({ open, setOpen, data, onTypeAdded }: EditMenuInfoProps) =
                   </MenuItem>
                 ))}
               </CustomTextField>
-            </Grid>
+            </Grid> */}
 
             
           </Grid>

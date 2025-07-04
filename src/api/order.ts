@@ -4,9 +4,13 @@ import type { OrderDataType } from './interface/orderInterface'
 import { ENDPOINTS } from './vars/vars'
 import { GET, POST, GETBYID, PATCH, SEARCHBYPARAMS } from './api'
 
-export async function getAllOrders(): Promise<any> {
+export async function getAllOrders(params?: { search?: string }): Promise<any> {
   try {
-    const url = `whatseat/${ENDPOINTS.orders}/`
+    let url = `whatseat/${ENDPOINTS.orders}/`
+    if (params?.search) {
+      const searchParams = new URLSearchParams({ search: params.search })
+      url += `?${searchParams.toString()}`
+    }
     const response = await GET(url)
     return response
   } catch (error: any) {
@@ -17,6 +21,22 @@ export async function getAllOrders(): Promise<any> {
     }
   }
 }
+
+export async function getAllOrdersByBusinessId(businessId : string): Promise<any> {
+  try {
+    const url = `whatseat/${ENDPOINTS.orders}/by-business/${businessId}/`
+    const response = await GET(url)
+
+    return response.data
+  } catch (error: any) {
+    if (error.response) {
+      throw error.response
+    } else {
+      throw new Error('Error in fetching menus data')
+    }
+  }
+}
+
 
 export async function createOrder(data: OrderDataType): Promise<any> {
   try {

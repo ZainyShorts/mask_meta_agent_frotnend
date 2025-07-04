@@ -14,7 +14,7 @@ import { MenuItem } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import { useForm } from 'react-hook-form'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
@@ -94,11 +94,13 @@ const AddWhatsAppDrawer = ({ open, handleClose }: Props) => {
   const onSubmit = (data: WhatsAppDataType, e: any) => {
     e.preventDefault()
     setLoading(true)
+    console.log('trigger')
 
     FeedWhatsApp(data)
       .then(res => {
         console.log(res, 'create FeedWhatsApp')
         toast.success('WhatsApp data created successfully', {
+          id: 'success-whatsapp-feed',
           duration: 5000 // Duration in milliseconds (5 seconds)
         })
         handleClose()
@@ -108,16 +110,16 @@ const AddWhatsAppDrawer = ({ open, handleClose }: Props) => {
       .catch(error => {
         if (error?.data && error?.data?.feed_to_gpt) {
           toast.error(error?.data?.feed_to_gpt[0], {
+            id: 'error-whatsapp-feed',
             duration: 5000 // Duration in milliseconds (5 seconds)
           })
         } else {
           toast.error('error in Feed WhatsApp' , {
+            id: 'error-whatsapp-feed',
             duration: 5000 // Duration in milliseconds (5 seconds)
           })
         }
-        console.log(error, 'error in FeedWhatsApp' , {
-          duration: 5000 // Duration in milliseconds (5 seconds)
-        })
+        console.log(error)
         // feed_to_gpt
       })
       .finally(() => {
@@ -266,7 +268,6 @@ const AddWhatsAppDrawer = ({ open, handleClose }: Props) => {
             </CardContent>
           </Card>
         </form>
-        <Toaster />
       </div>
     </Drawer>
   )

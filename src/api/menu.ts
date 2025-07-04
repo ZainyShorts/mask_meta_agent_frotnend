@@ -4,12 +4,26 @@ import type { MenuDataType, SyncMenuDataType } from './interface/menuIterface'
 import { ENDPOINTS } from './vars/vars'
 import { GET, GETBYID, PATCH, POST, DELETE } from './api'
 
-export async function getAllMenues(businessId : string): Promise<any> {
+export async function getAllMenues(): Promise<any> {
   try {
-    const url = `whatseat/${ENDPOINTS.menus}/${businessId}/`
+    const url = `whatseat/${ENDPOINTS.menus}/`
     const response = await GET(url)
 
     return response
+  } catch (error: any) {
+    if (error.response) {
+      throw error.response
+    } else {
+      throw new Error('Error in fetching menus data')
+    }
+  }
+}
+export async function getAllMenuesByBusinessId(businessId : string): Promise<any> {
+  try {
+    const url = `whatseat/${ENDPOINTS.menus}/by-business/${businessId}/`
+    const response = await GET(url)
+
+    return response.data
   } catch (error: any) {
     if (error.response) {
       throw error.response
@@ -23,7 +37,6 @@ export async function getAllMenues(businessId : string): Promise<any> {
 
 
 
-// by-business
 
 export async function createMenu(data: MenuDataType): Promise<any> {
   try {

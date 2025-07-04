@@ -152,7 +152,7 @@ const EditUserInfo = ({ open, setOpen, data, onTypeAdded }: EditUserInfoProps) =
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <CustomTextField
                 select
                 fullWidth
@@ -170,7 +170,7 @@ const EditUserInfo = ({ open, setOpen, data, onTypeAdded }: EditUserInfoProps) =
                     </MenuItem>
                   ))}
               </CustomTextField>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 autoFocus

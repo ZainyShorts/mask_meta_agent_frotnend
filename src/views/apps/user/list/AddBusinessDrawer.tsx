@@ -12,7 +12,7 @@ import Divider from '@mui/material/Divider'
 
 // Component Imports
 import { useForm } from 'react-hook-form'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import CustomTextField from '@core/components/mui/TextField'
 import type { BusinessDataTypeForAddBusiness } from '@/api/interface/businessInterface'
 import { createBusiness, getAllBusiness } from '@/api/business'
@@ -231,7 +231,6 @@ const AddBusinessDrawer = ({ open, handleClose }: Props) => {
           </div>
           {loading && <Loader />}
         </form>
-        <Toaster />
       </div>
     </Drawer>
   )

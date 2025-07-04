@@ -14,7 +14,7 @@ import FaceBookListTable from '@/views/apps/user/list/FaceBookListTable'
 import TelagramListTable from '@/views/apps/user/list/TelagramListTable'
 import FeedToGptListTable from '@/views/apps/user/list/FeedToGptListTable'
 import ChatGptListTable from '@/views/apps/user/list/ChatGptListTable'
-
+import ShopifyListTable from '@/views/apps/user/list/ShopifyListTable'
 const Connections = () => {
   return (
     <Grid container spacing={4}>
@@ -27,7 +27,9 @@ const Connections = () => {
       <Grid item xs={12} md={6}>
         <FaceBookCard />
       </Grid> */}
-
+      <Grid item xs={12}>
+        <ShopifyListTable />
+      </Grid>
       <Grid item xs={12}>
         <FeedToGptListTable />
       </Grid>

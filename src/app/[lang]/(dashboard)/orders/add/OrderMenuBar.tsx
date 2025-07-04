@@ -66,7 +66,8 @@ const OrderMenuBar = () => {
         setRestoData(restos)
       } catch (err: any) {
         console.error('Error fetching businesses:', err)
-        toast.error(err.message || 'Failed to fetch businesses')
+        // toast.error(err.message || 'Failed to fetch businesses')
+        console.log(err.message)
       }
     }
 
@@ -100,6 +101,7 @@ const OrderMenuBar = () => {
         const menuData = await getAllMenues()
         const menuResults: MenuDataType[] = menuData?.data?.results
         setAllMenus(menuResults)
+        console.log('meuresults', menuResults)
 
         if (results?.length > 0) {
           const firstId = results[0].id
@@ -371,7 +373,6 @@ const OrderMenuBar = () => {
           borderBottom: '1px solid #eee'
         }}
       >
-        {/* Left: Item Name & Price */}
         <Box sx={{ flex: 1 }}>
           <Typography variant='body1'>{item.name}</Typography>
           <Typography variant='body2' color='text.secondary'>
@@ -379,7 +380,6 @@ const OrderMenuBar = () => {
           </Typography>
         </Box>
 
-        {/* Right: Quantity Controls */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton
             size='small'

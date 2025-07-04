@@ -16,6 +16,21 @@ export async function getAllOrderReturns(): Promise<any> {
   }
 }
 
+export async function getAllReturnOrdersByBusinessId(businessId : string): Promise<any> {
+  try {
+    const url = `whatseat/${ENDPOINTS.returnOrders}/by-business/${businessId}/`
+    const response = await GET(url)
+
+    return response.data
+  } catch (error: any) {
+    if (error.response) {
+      throw error.response
+    } else {
+      throw new Error('Error in fetching menus data')
+    }
+  }
+}
+
 export async function createOrderReturns(data: any): Promise<any> {
   try {
     const url = `whatseat/${ENDPOINTS.returnOrder}/create/`

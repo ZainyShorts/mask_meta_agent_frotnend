@@ -127,10 +127,13 @@ export async function updateUserPassword(data: updateUserPasswordData): Promise<
   }
 }
 
-export async function getAllUsers(): Promise<any> {
+export async function getAllUsers(params?: { search?: string }): Promise<any> {
   try {
-    // https://mask-toolbots-fjb0fbbteaf4dcdw.westeurope-01.azurewebsites.net/api/
-    const url = `account/${ENDPOINTS.users}/`
+    let url = `account/${ENDPOINTS.users}/`
+    if (params?.search) {
+      const searchParams = new URLSearchParams({ search: params.search })
+      url += `?${searchParams.toString()}`
+    }
     const response = await GET(url)
     return response
   } catch (error: any) {
@@ -181,7 +184,7 @@ export async function getUserByIduy(id: number): Promise<any> {
 export async function deletUser(id: string): Promise<any> {
   try {
     const url = `account/${ENDPOINTS.users}`
-    const response = await DELETE(url, id)
+    const response = await DELETE(url, `${id}/delete`)
 
     return response
   } catch (error: any) {

@@ -29,6 +29,7 @@ import type { User } from '@/api/interface/userInterface'
 import { createUser, getUserTypes } from '@/api/user'
 import { InputAdornment } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
+import { useAuthStore } from '@/store/authStore'
 
 type AddtMenuFormProps = {
   open: boolean
@@ -58,6 +59,7 @@ const AddUserForm = (
 ) => {
   const [formError, setFormError] = useState('')
   const router = useRouter()
+  const { user } = useAuthStore()
 
   const {
     register,
@@ -69,28 +71,28 @@ const AddUserForm = (
 
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [loading, setLoading] = useState<boolean>(false)
-  const [userTypes, setUserTypes] = useState<UserRole[]>([])
+  // const [userTypes, setUserTypes] = useState<UserRole[]>([])
   const [addType, setAddType] = useState<boolean>(false)
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
-  useEffect(() => {
-    const fetchUserTypes = async () => {
-      setLoading(true)
+  // useEffect(() => {
+  //   const fetchUserTypes = async () => {
+  //     setLoading(true)
 
-      try {
-        const response = await getUserTypes()
+  //     try {
+  //       const response = await getUserTypes()
 
-        setUserTypes(response?.data || [])
-      } catch (err: any) {
-        // setError(err.message || 'Failed to fetch users')
-      } finally {
-        setLoading(false)
-      }
-    }
+  //       setUserTypes(response?.data || [])
+  //     } catch (err: any) {
+  //       // setError(err.message || 'Failed to fetch users')
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
 
-    fetchUserTypes()
-  }, [])
+  //   fetchUserTypes()
+  // }, [])
 
   const onSubmit = (data: User, e: any) => {
     e.preventDefault()
@@ -99,8 +101,13 @@ const AddUserForm = (
 
     const submissionData = {
       ...data,
-      status: 'Pending'
+      status: 'Active',
+      user_type: 3,
+      businessownerId: user?.id,
+      subscription: true
     }
+
+    console.log('payload', submissionData)
 
     // console.log(submissionData, 'submissionData')
 
@@ -223,7 +230,7 @@ const AddUserForm = (
                   }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              {/* <Grid item xs={12} sm={6}>
                 <CustomTextField
                   select
                   fullWidth
@@ -240,7 +247,7 @@ const AddUserForm = (
                       </MenuItem>
                     ))}
                 </CustomTextField>
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} sm={6}>
                 <CustomTextField
                   autoFocus
@@ -309,7 +316,7 @@ const AddUserForm = (
           </DialogContent>
         </form>
 
-        <Toaster />
+        {/* <Toaster /> */}
       </div>
     </Dialog>
   )

@@ -27,6 +27,8 @@ export type BusinessType = {
   city: string
   name: string
   logo: string
+  app_code: string
+  business_email: string
   currency: CurrencyObject
   // user: UserId
 }
@@ -42,6 +44,8 @@ export type BusinessEditPayload = {
   business_doc?: string
   name: string
   logo?: string
+  app_code: string
+  business_email: string
   currency?: CurrencyObject
 }
 

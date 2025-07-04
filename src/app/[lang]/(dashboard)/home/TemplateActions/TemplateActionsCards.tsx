@@ -12,7 +12,7 @@ import CustomTextField from '@core/components/mui/TextField'
 import { SxProps, Theme } from '@mui/material/styles'
 import { BusinessType } from '@/types/apps/businessTypes'
 import { getAllBusiness } from '@/api/business'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { createTemplate, createFlow } from '@/api/menu'
 
 import { getFaceBookFlowsByBusinessId, getFaceBookTemplatesByBusinessId } from '@/api/templates'
@@ -156,7 +156,7 @@ const EarningReports: React.FC = () => {
       console.error('Failed to fetch business:', err.message)
 
       // toast.dismiss()
-      toast.error('Failed to fetch businesses.', { position: 'top-right' })
+      // toast.error('Failed to fetch businesses.', { position: 'top-right' })
     }
   }
 
@@ -178,7 +178,7 @@ const EarningReports: React.FC = () => {
       const templates = templatesResponse?.data || []
 
       const addressTemplateExists = templates.some(
-        (template: FaceBookTemplateDataType) => template.template_name.trim() === 'address_en'
+        (template: FaceBookTemplateDataType) => template.template_name.trim() === 'address_form_for_customer_combinations'
       )
       setHasAddressTemplate(addressTemplateExists)
       const welcomeTemplateExists = templates.some(
@@ -190,7 +190,7 @@ const EarningReports: React.FC = () => {
       )
       setHasPendingOrderTemplate(pendingOrderTemplateExists)
       const deliveryOrPickupTemplateExists = templates.some(
-        (template: FaceBookTemplateDataType) => template.template_name.trim() === 'delivery_or_pickup_template_3_en'
+        (template: FaceBookTemplateDataType) => template.template_name.trim() === 'delivery_or_pickup_template_3_local_en'
       )
       setHasDeliveryOrPickupTemplate(deliveryOrPickupTemplateExists)
       const hasCatalogTemplateExists = templates.some(
@@ -242,7 +242,7 @@ const EarningReports: React.FC = () => {
     const payload = {
       flow_type: 'address',
       // name: 'address_flow',
-      name: `address_flow_3_${languageCode}`,
+      name: `kosmos_backend_germany_de_${languageCode}`,
       categories: ['OTHER'],
       business_id: businessId
     }
@@ -261,7 +261,7 @@ const EarningReports: React.FC = () => {
   const handleAddressTemplateClick = (businessId: number): void => {
     setIsLoad(false)
     const payload = {
-      name: `address_${languageCode}`,
+      name: `address_form_for_customer_combinations`,
       category: 'MARKETING',
       allow_category_change: true,
       language: 'en',
@@ -311,7 +311,7 @@ const EarningReports: React.FC = () => {
     setIsLoad(false)
     const payload = {
       // name: 'welcome_template',
-      name: `privacy_policy_check_test_${languageCode}`,
+      name: `privacy_policy_check_local_${languageCode}`,
       category: 'MARKETING',
       allow_category_change: true,
       language: 'en',
@@ -445,7 +445,7 @@ For any questions or concerns, feel free to contact us.
     setIsLoad(false)
     const payload = {
       // name: 'security_template',
-      name: `delivery_or_pickup_template_3_${languageCode}`,
+      name: `delivery_or_pickup_template_3_local_${languageCode}`,
       category: 'MARKETING',
       allow_category_change: true,
       language: 'en',
@@ -466,11 +466,11 @@ For any questions or concerns, feel free to contact us.
             {
               type: 'QUICK_REPLY',
               text: 'Delivery'
-            },
-            {
-              type: 'QUICK_REPLY',
-              text: 'Pickup'
             }
+            // {
+            //   type: 'QUICK_REPLY',
+            //   text: 'Pickup'
+            // }
           ]
         }
       ],
