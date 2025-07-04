@@ -46,6 +46,8 @@ export type BusinessEditPayload = {
   logo?: string
   app_code: string
   business_email: string
+  mail_server?: string
+  custom_mail_server?: string
   currency?: CurrencyObject
 }
 

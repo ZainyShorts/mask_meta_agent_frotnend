@@ -227,7 +227,7 @@ const EditUserInfo = ({ open, setOpen, data, onTypeAdded }: EditUserInfoProps) =
           </Button>
         </DialogActions>
       </form>
-      <Toaster />
+      {/* <Toaster /> */}
     </Dialog>
   )
 }

@@ -1,26 +1,28 @@
-'use client'
+"use client"
 
 // React Imports
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+
 // MUI Imports
-import Grid from '@mui/material/Grid'
-import Dialog from '@mui/material/Dialog'
-import Button from '@mui/material/Button'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import MenuItem from '@mui/material/MenuItem'
-import Typography from '@mui/material/Typography'
+import Grid from "@mui/material/Grid"
+import Dialog from "@mui/material/Dialog"
+import Button from "@mui/material/Button"
+import DialogTitle from "@mui/material/DialogTitle"
+import DialogContent from "@mui/material/DialogContent"
+import DialogActions from "@mui/material/DialogActions"
+import MenuItem from "@mui/material/MenuItem"
+import Typography from "@mui/material/Typography"
+import Alert from "@mui/material/Alert"
+import Collapse from "@mui/material/Collapse"
 
 // Component Imports
-import DialogCloseButton from '../DialogCloseButton'
-import CustomTextField from '@core/components/mui/TextField'
-import { WhatsAppDataType } from '@/api/interface/whatsappInterface'
-import { updateWhatsApp } from '@/api/whatsapp'
-import toast, { Toaster } from 'react-hot-toast'
-import { BusinessType } from '@/types/apps/businessTypes'
-import { getAllBusiness } from '@/api/business'
+import DialogCloseButton from "../DialogCloseButton"
+import CustomTextField from "@core/components/mui/TextField"
+import type { WhatsAppDataType } from "@/api/interface/whatsappInterface"
+import { updateWhatsApp } from "@/api/whatsapp"
+import type { BusinessType } from "@/types/apps/businessTypes"
+import { getAllBusiness } from "@/api/business"
 
 type EditWhatsAppInfoProps = {
   open: boolean
@@ -29,15 +31,44 @@ type EditWhatsAppInfoProps = {
   onTypeAdded?: any
 }
 
+type AlertState = {
+  show: boolean
+  type: "success" | "error"
+  message: string
+}
+
 const EditWhatsAppInfo = ({ open, setOpen, data, onTypeAdded }: EditWhatsAppInfoProps) => {
   const [loading, setLoading] = useState<boolean>(false)
+  const [userBusinessData, setUserBusinessData] = useState<BusinessType[]>([])
+  const [alert, setAlert] = useState<AlertState>({
+    show: false,
+    type: "success",
+    message: "",
+  })
+
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm<WhatsAppDataType>()
 
-  const [userBusinessData, setUserBusinessData] = useState<BusinessType[]>([])
+  // Auto-hide alert after 5 seconds
+  useEffect(() => {
+    if (alert.show) {
+      const timer = setTimeout(() => {
+        setAlert((prev) => ({ ...prev, show: false }))
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert.show])
+
+  const showAlert = (type: "success" | "error", message: string) => {
+    setAlert({
+      show: true,
+      type,
+      message,
+    })
+  }
 
   useEffect(() => {
     const fetchBusiness = async () => {
@@ -50,41 +81,39 @@ const EditWhatsAppInfo = ({ open, setOpen, data, onTypeAdded }: EditWhatsAppInfo
         // setLoading(false)
       }
     }
-
     fetchBusiness()
   }, [])
 
   const handleClose = () => {
     setOpen(false)
+    setAlert({ show: false, type: "success", message: "" })
   }
 
   const onSubmit = (data1: WhatsAppDataType, e: any) => {
     e.preventDefault()
-
+    setLoading(true)
     const id: number = data?.id ?? 0
+
     updateWhatsApp(id, data1)
-      .then(res => {
-        toast.success('Whats App Feed Updated Successfully', {
-          duration: 5000 // Duration in milliseconds (5 seconds)
-        })
+      .then((res) => {
+        showAlert("success", "WhatsApp Feed Updated Successfully")
+
         if (onTypeAdded) {
           onTypeAdded()
         }
-        setOpen(false)
+
+        // Close modal after showing success message
+        setTimeout(() => {
+          setOpen(false)
+        }, 2000)
       })
-      .catch(error => {
+      .catch((error) => {
         if (error?.data?.business) {
-          toast.error(error?.data?.business[0], {
-            duration: 5000 // Duration in milliseconds (5 seconds)
-          })
+          showAlert("error", error?.data?.business[0])
         } else if (error?.data?.active) {
-          toast.error(error?.data?.active[0], {
-            duration: 5000 // Duration in milliseconds (5 seconds)
-          })
+          showAlert("error", error?.data?.active[0])
         } else {
-          toast.error('Error In Updating WhatsApp Feed', {
-            duration: 5000 // Duration in milliseconds (5 seconds)
-          })
+          showAlert("error", "Error In Updating WhatsApp Feed")
         }
       })
       .finally(() => {
@@ -93,118 +122,142 @@ const EditWhatsAppInfo = ({ open, setOpen, data, onTypeAdded }: EditWhatsAppInfo
   }
 
   return (
-    <Dialog fullWidth open={open} maxWidth='md' scroll='body' sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}>
+    <Dialog fullWidth open={open} maxWidth="md" scroll="body" sx={{ "& .MuiDialog-paper": { overflow: "visible" } }}>
       <DialogCloseButton onClick={() => setOpen(false)} disableRipple>
-        <i className='tabler-x' />
+        <i className="tabler-x" />
       </DialogCloseButton>
-      <DialogTitle variant='h4' className='flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'>
-        Edit whatsApp Information
-        <Typography component='span' className='flex flex-col text-center'>
-          Updating whatsApp details will receive a privacy audit.
+
+      <DialogTitle variant="h4" className="flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16">
+        Edit WhatsApp Information
+        <Typography component="span" className="flex flex-col text-center">
+          Updating WhatsApp details will receive a privacy audit.
         </Typography>
       </DialogTitle>
+
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
+        <DialogContent className="overflow-visible pbs-0 sm:pli-16">
+          {/* Alert Message */}
+          <Collapse in={alert.show} sx={{ mb: 2 }}>
+            <Alert severity={alert.type} onClose={() => setAlert((prev) => ({ ...prev, show: false }))} sx={{ mb: 2 }}>
+              {alert.message}
+            </Alert>
+          </Collapse>
+
           <Grid container spacing={5}>
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 select
                 fullWidth
-                id='business'
-                label='Select Business'
-                defaultValue={data?.business || ''}
-                inputProps={{ placeholder: 'Business', ...register('business') }}
+                id="business"
+                label="Select Business"
+                defaultValue={data?.business || ""}
+                inputProps={{ placeholder: "Business", ...register("business") }}
                 error={!!errors.business}
                 helperText={errors.business?.message}
               >
                 {userBusinessData &&
-                  userBusinessData?.map(business => (
+                  userBusinessData?.map((business) => (
                     <MenuItem key={business.id} value={business.id}>
                       {business.business_id}
                     </MenuItem>
                   ))}
               </CustomTextField>
             </Grid>
+
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
-                label='Phone Id'
-                defaultValue={data?.phone_id || ''}
-                {...register('phone_id', {
-                  required: 'Phone Id is required'
+                label="Phone Id"
+                defaultValue={data?.phone_id || ""}
+                {...register("phone_id", {
+                  required: "Phone Id is required",
                 })}
+                error={!!errors.phone_id}
+                helperText={errors.phone_id?.message}
               />
             </Grid>
+
             <Grid item xs={12}>
               <CustomTextField
                 fullWidth
-                label='Access Token'
-                {...register('access_token', { required: 'Access Token is required' })}
-                defaultValue={data?.access_token || ''}
-                {...register('access_token', {
-                  required: 'Access Token is required'
+                label="Access Token"
+                defaultValue={data?.access_token || ""}
+                {...register("access_token", {
+                  required: "Access Token is required",
                 })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField
-                fullWidth
-                label='WhatsApp Account Id'
-                {...register('whatsapp_account_id', { required: 'WhatsApp Account Id is required' })}
-                defaultValue={data?.whatsapp_account_id || ''}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField
-                fullWidth
-                label='Catalog Id'
-                {...register('catalog_id', { required: 'Catalog Id is required' })}
-                defaultValue={data?.catalog_id || ''}
-                {...register('catalog_id', {
-                  required: 'Catalog Id is required'
-                })}
+                error={!!errors.access_token}
+                helperText={errors.access_token?.message}
               />
             </Grid>
 
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
-                label='Web Hook Token'
-                defaultValue={data?.webhook_token || ''}
-                {...register('webhook_token', {
-                  required: 'Web Hook Token is required'
+                label="WhatsApp Account Id"
+                defaultValue={data?.whatsapp_account_id || ""}
+                {...register("whatsapp_account_id", {
+                  required: "WhatsApp Account Id is required",
                 })}
+                error={!!errors.whatsapp_account_id}
+                helperText={errors.whatsapp_account_id?.message}
               />
             </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                fullWidth
+                label="Catalog Id"
+                defaultValue={data?.catalog_id || ""}
+                {...register("catalog_id", {
+                  required: "Catalog Id is required",
+                })}
+                error={!!errors.catalog_id}
+                helperText={errors.catalog_id?.message}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                fullWidth
+                label="Web Hook Token"
+                defaultValue={data?.webhook_token || ""}
+                {...register("webhook_token", {
+                  required: "Web Hook Token is required",
+                })}
+                error={!!errors.webhook_token}
+                helperText={errors.webhook_token?.message}
+              />
+            </Grid>
+
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 select
                 fullWidth
-                label='Status'
-                defaultValue={data?.active ? 'true' : 'false'} // Map true to 'true' and false to 'false'
-                {...register('active', { required: 'Status is required' })}
+                label="Status"
+                defaultValue={data?.active ? "true" : "false"}
+                {...register("active", { required: "Status is required" })}
                 error={!!errors.active}
                 helperText={errors.active?.message}
               >
-                <MenuItem value='' disabled>
+                <MenuItem value="" disabled>
                   Select Status
                 </MenuItem>
-                <MenuItem value='true'>Active</MenuItem>
-                <MenuItem value='false'>Inactive</MenuItem>
+                <MenuItem value="true">Active</MenuItem>
+                <MenuItem value="false">Inactive</MenuItem>
               </CustomTextField>
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16'>
-          <Button variant='contained' type='submit'>
-            Submit
+
+        <DialogActions className="justify-center pbs-0 sm:pbe-16 sm:pli-16">
+          <Button variant="contained" type="submit" disabled={loading}>
+            {loading ? "Updating..." : "Submit"}
           </Button>
-          <Button variant='tonal' color='secondary' type='reset' onClick={handleClose}>
+          <Button variant="tonal" color="secondary" type="reset" onClick={handleClose}>
             Cancel
           </Button>
         </DialogActions>
       </form>
-      <Toaster />
     </Dialog>
   )
 }

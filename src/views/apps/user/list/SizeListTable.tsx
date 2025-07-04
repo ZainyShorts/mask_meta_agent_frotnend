@@ -147,7 +147,7 @@ const SizeListTable = ({ isCreated, id }: PreviewProps) => {
       menuSizeAction(menuSize)
     } catch (err: any) {
       console.error('Error fetching sizes:', err)
-      toast.error(err.message || 'Failed to fetch sizes')
+      toast.error('Failed to fetch sizes')
     }
   }
 

@@ -279,6 +279,7 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
           toast.success(result.msg, {
             id: "csv-import",
           })
+          // handleConfirm() // sync to meta
           fetchMenuesForBusiness(selectedBusiness)
         } else {
           toast.error(result.msg || "Failed to import CSV data", {
@@ -457,7 +458,7 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
         header: "Price",
         cell: ({ row }) => (
           <Typography className="capitalize" color="text.primary">
-            <strong>{row.original.price}</strong>
+            <strong>{row.original.price} {userBuinsessData[0].currency.code}</strong>
           </Typography>
         ),
       }),
@@ -573,7 +574,7 @@ const MenuListTable = ({ tableData }: { tableData?: MenuesType[] }) => {
               id="business"
               value={selectedBusiness}
               onChange={handleBusinessChange}
-              displayEmpty
+              // displayEmpty
             >
               <MenuItem value="">
                 <em>Select a business</em>

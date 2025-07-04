@@ -160,11 +160,11 @@ const WhatsppAppListTable = ({ tableData }: { tableData?: WhatsAppDataType[] }) 
     deleteWhatsApp(id.toString())
       .then(res => {
         console.log(res, 'WhatsApp deleted')
-        hotToast.success('WhatsApp deleted successfully')
+        // hotToast.success('WhatsApp deleted successfully')
         setDeleteWhatsAppOpen(true)
       })
       .catch(error => {
-        console.log(error, 'error in deleting WhatsApp')
+        // console.log(error, 'error in deleting WhatsApp')
 
         // if (error?.data && error?.data?.detail) {
         //   toast.error(error?.data?.detail)

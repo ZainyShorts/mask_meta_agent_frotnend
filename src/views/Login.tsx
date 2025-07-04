@@ -770,13 +770,13 @@ const Login = ({ mode }: { mode: SystemMode }) => {
         position: "top-right",
       })
 
-      if (data.user.subscription === false) {
+      if (data.user.subscription === false && Number(user?.user_type) === 1) {
         router.push(getLocalizedUrl("/account-settings", locale))
       } else {
-        if(Number(user?.user_type) === 1){
+        if(Number(data.user?.user_type) === 1){
           router.push(getLocalizedUrl("/home", locale))
         }
-        else if(Number(user?.user_type) === 2){
+        else if(Number(data.user?.user_type) === 2){
           router.push(getLocalizedUrl("/users", locale))
         }else{
            router.push(getLocalizedUrl("/menu", locale))

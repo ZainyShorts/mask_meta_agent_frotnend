@@ -12,6 +12,8 @@ import DialogTitle from "@mui/material/DialogTitle"
 import DialogContent from "@mui/material/DialogContent"
 import DialogActions from "@mui/material/DialogActions"
 import Typography from "@mui/material/Typography"
+import { MenuItem } from "@mui/material"
+
 // Component Imports
 import DialogCloseButton from "../DialogCloseButton"
 import CustomTextField from "@core/components/mui/TextField"
@@ -19,11 +21,9 @@ import { toast } from "react-hot-toast"
 import { useParams, useRouter } from "next/navigation"
 import type { BusinessEditPayload, BusinessType } from "@/types/apps/businessTypes"
 import { getAllBusiness, updateBusiness } from "@/api/business"
-
 import { useAuthStore } from "@/store/authStore"
 import ConfirmationDialog from "@/components/ConfirmationDialog"
 import type { CurrencyDataType } from "@/api/interface/currencyInterface"
-import { MenuItem } from "@mui/material"
 import { ENDPOINTS, getBaseUrl } from "@/api/vars/vars"
 
 type EditBusinessInfoProps = {
@@ -35,9 +35,9 @@ type EditBusinessInfoProps = {
 
 const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfoProps) => {
   const router = useRouter()
-
   const { lang: locale } = useParams()
   const [loading, setLoading] = useState<boolean>(false)
+
   const {
     register,
     handleSubmit,
@@ -49,10 +49,8 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
   const [userBusinessData, setUserBusinessData] = useState<BusinessType[]>([])
   const [currencyData, setCurrencyData] = useState<CurrencyDataType[]>([])
   const [selectedCurrency, setSelectedCurrency] = useState<any>(null)
-
   const { businessAction } = useAuthStore()
   const [openConfirmation, setOpenConfirmation] = useState(false)
-
   const [payloadData, setPayloadData] = useState<BusinessEditPayload | null>(null)
 
   const handleConfirm = async () => {
@@ -67,16 +65,17 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
       business_initial: payloadData?.business_initial,
       id: payloadData?.id,
       name: payloadData?.name,
-      currency: selectedCurrency?.id, // Add this line
-      app_code: selectedCurrency.app_code,
-      business_email:  selectedCurrency.business_email
+      currency: selectedCurrency?.id,
+      app_code: payloadData?.app_code,
+      business_email: payloadData?.business_email,
+      mail_server: payloadData?.mail_server, // Simple text field value
     }
+
     try {
       setLoading(true)
-
       await updateBusiness(payloadData.id, submittedpayload)
       toast.success("Business Updated Successfully", {
-        duration: 5000, // Duration in milliseconds (5 seconds)
+        duration: 5000,
       })
       setOpen(false)
       if (onTypeAdded) onTypeAdded()
@@ -84,15 +83,15 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
       console.log(error?.data, "error-------->")
       if (error?.data?.user) {
         toast.error(error?.data?.user[0], {
-          duration: 5000, // Duration in milliseconds (5 seconds)
+          duration: 5000,
         })
       } else if (error?.data?.business_doc) {
         toast.error(error?.data?.business_doc[0], {
-          duration: 5000, // Duration in milliseconds (5 seconds)
+          duration: 5000,
         })
       } else {
         toast.error(error?.data?.message || "Error Updating Business", {
-          duration: 5000, // Duration in milliseconds (5 seconds)
+          duration: 5000,
         })
       }
     } finally {
@@ -115,7 +114,6 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
     const fetchBusiness = async () => {
       try {
         const response = await getAllBusiness()
-
         // Fetch currencies from your API endpoint
         const authToken = localStorage.getItem("auth_token")
         const currencyResponse = await fetch(`${getBaseUrl()}whatseat/${ENDPOINTS.currencies}/`, {
@@ -136,7 +134,6 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
         console.error("Error fetching data:", err)
       }
     }
-
     fetchBusiness()
   }, [])
 
@@ -188,56 +185,38 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
                 helperText={errors.business_id?.message}
               />
             </Grid>
-
             <Grid item xs={12}>
               <CustomTextField
                 fullWidth
                 label="Business Description"
                 {...register("business_desc", { required: "Business Description is required" })}
                 defaultValue={data?.business_desc || ""}
-                {...register("business_desc", {
-                  required: "Business Description is required",
-                })}
               />
             </Grid>
-
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
                 label="Business Email"
                 {...register("business_email", { required: "Business email is required" })}
                 defaultValue={data?.business_email || ""}
-                {...register("business_email", {
-                  required: "Business email is required",
-                })}
               />
             </Grid>
-
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
                 label="App code"
                 {...register("app_code", { required: "App code is required" })}
                 defaultValue={data?.app_code || ""}
-                {...register("app_code", {
-                  required: "App code is required",
-                })}
               />
             </Grid>
-            
-
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
                 label="Business Address"
                 {...register("business_address", { required: "Business Address is required" })}
                 defaultValue={data?.business_address || ""}
-                {...register("business_address", {
-                  required: "Business Address is required",
-                })}
               />
             </Grid>
-
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
@@ -254,7 +233,6 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
                 helperText={errors.business_initial?.message}
               />
             </Grid>
-
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 select
@@ -293,6 +271,25 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
               />
             </Grid>
 
+            {/* Simple Mail Server Text Field */}
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label="Mail Server *"
+                fullWidth
+                placeholder="Enter SMTP server (e.g., smtp.gmail.com)"
+                defaultValue={data?.mail_server || ""}
+                {...register("mail_server", {
+                  required: "Mail server is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Please enter a valid SMTP server address",
+                  },
+                })}
+                error={!!errors.mail_server}
+                helperText={errors.mail_server?.message}
+              />
+            </Grid>
+
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
@@ -301,11 +298,8 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
                 defaultValue={data?.business_doc || ""}
                 inputProps={{
                   placeholder: "business_doc",
-                  readOnly: true, // Set the field as read-only
-                  // ...register('business_doc')
+                  readOnly: true,
                 }}
-                // error={!!errors.business_doc}
-                // helperText={errors.business_doc?.message}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -316,11 +310,8 @@ const EditBusinessInfo = ({ open, setOpen, data, onTypeAdded }: EditBusinessInfo
                 defaultValue={data?.logo || ""}
                 inputProps={{
                   placeholder: "Business Logo",
-                  readOnly: true, // Set the field as read-only
-                  // ...register('business_doc')
+                  readOnly: true,
                 }}
-                // error={!!errors.business_doc}
-                // helperText={errors.business_doc?.message}
               />
             </Grid>
           </Grid>

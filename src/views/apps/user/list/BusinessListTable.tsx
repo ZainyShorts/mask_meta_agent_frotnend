@@ -411,7 +411,7 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
             </CustomTextField>
 
             {/* Add Search Input */}
-            <DebouncedInput
+            {/* <DebouncedInput
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search businesses..."
@@ -429,14 +429,13 @@ const BusinessListTable = ({ tableData }: { tableData?: BusinessTypeForFile[] })
                 ),
               }}
               debounce={300} // 300ms debounce for search
-            />
+            /> */}
           </div>
 
           {user && Number(user?.user_type) === 1 && (
             <div className="flex flex-col sm:flex-row is-full sm:is-auto items-start sm:items-center gap-4">
               <OpenDialogOnElementClick
                 element={Button}
-                // elementProps={buttonProps("Add Business", "primary", "contained")}
                 elementProps={{
                 ...buttonProps("Add Business", "primary", "contained"),
                 disabled: table && table.getFilteredRowModel().rows.length > 0,

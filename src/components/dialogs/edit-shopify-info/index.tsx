@@ -1,8 +1,10 @@
 "use client"
 
 import type React from "react"
+
 // React Imports
 import { useState, useEffect } from "react"
+
 // MUI Imports
 import Dialog from "@mui/material/Dialog"
 import DialogTitle from "@mui/material/DialogTitle"
@@ -11,10 +13,12 @@ import DialogActions from "@mui/material/DialogActions"
 import Button from "@mui/material/Button"
 import Grid from "@mui/material/Grid"
 import MenuItem from "@mui/material/MenuItem"
+import Alert from "@mui/material/Alert"
+import Collapse from "@mui/material/Collapse"
+
 // Component Imports
 import CustomTextField from "@core/components/mui/TextField"
-// Third-party Imports
-import toast from "react-hot-toast"
+
 // API Imports
 import { updateStore } from "@/api/shopify" // Adjust path as needed
 
@@ -35,14 +39,42 @@ type Props = {
   onTypeAdded?: () => void
 }
 
+type AlertState = {
+  show: boolean
+  type: "success" | "error"
+  message: string
+}
+
 const EditShopifyInfo = ({ open, setOpen, data, onTypeAdded }: Props) => {
   const [formData, setFormData] = useState({
     admin_access_token: "",
     shopify_domain_url: "",
     shopify_version: "",
   })
-
   const [loading, setLoading] = useState(false)
+  const [alert, setAlert] = useState<AlertState>({
+    show: false,
+    type: "success",
+    message: "",
+  })
+
+  // Auto-hide alert after 5 seconds
+  useEffect(() => {
+    if (alert.show) {
+      const timer = setTimeout(() => {
+        setAlert((prev) => ({ ...prev, show: false }))
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert.show])
+
+  const showAlert = (type: "success" | "error", message: string) => {
+    setAlert({
+      show: true,
+      type,
+      message,
+    })
+  }
 
   useEffect(() => {
     if (data && open) {
@@ -58,7 +90,7 @@ const EditShopifyInfo = ({ open, setOpen, data, onTypeAdded }: Props) => {
     e.preventDefault()
 
     if (!data?.id) {
-      toast.error("No account ID found")
+      showAlert("error", "No account ID found")
       return
     }
 
@@ -67,21 +99,25 @@ const EditShopifyInfo = ({ open, setOpen, data, onTypeAdded }: Props) => {
     try {
       // Call your actual API function
       const response = await updateStore(data.id, formData)
-
       console.log("Store updated successfully:", response)
-      toast.success("Shopify account updated successfully")
-      setOpen(false)
-      onTypeAdded?.()
+
+      showAlert("success", "Shopify account updated successfully")
+
+      // Close dialog and call callback after showing success message
+      setTimeout(() => {
+        setOpen(false)
+        onTypeAdded?.()
+      }, 2000)
     } catch (error: any) {
       console.error("Error updating store:", error)
 
       // Handle different types of errors
       if (error?.data?.message) {
-        toast.error(error.data.message)
+        showAlert("error", error.data.message)
       } else if (error?.message) {
-        toast.error(error.message)
+        showAlert("error", error.message)
       } else {
-        toast.error("Error updating Shopify account")
+        showAlert("error", "Error updating Shopify account")
       }
     } finally {
       setLoading(false)
@@ -90,6 +126,7 @@ const EditShopifyInfo = ({ open, setOpen, data, onTypeAdded }: Props) => {
 
   const handleClose = () => {
     setOpen(false)
+    setAlert({ show: false, type: "success", message: "" })
   }
 
   return (
@@ -97,6 +134,13 @@ const EditShopifyInfo = ({ open, setOpen, data, onTypeAdded }: Props) => {
       <DialogTitle>Edit Shopify Account</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
+          {/* Alert Message */}
+          <Collapse in={alert.show} sx={{ mb: 2 }}>
+            <Alert severity={alert.type} onClose={() => setAlert((prev) => ({ ...prev, show: false }))} sx={{ mb: 2 }}>
+              {alert.message}
+            </Alert>
+          </Collapse>
+
           <Grid container spacing={5}>
             <Grid item xs={12}>
               <CustomTextField
@@ -108,6 +152,7 @@ const EditShopifyInfo = ({ open, setOpen, data, onTypeAdded }: Props) => {
                 required
               />
             </Grid>
+
             <Grid item xs={12}>
               <CustomTextField
                 fullWidth
@@ -119,6 +164,7 @@ const EditShopifyInfo = ({ open, setOpen, data, onTypeAdded }: Props) => {
                 required
               />
             </Grid>
+
             <Grid item xs={12}>
               <CustomTextField
                 select
@@ -136,6 +182,7 @@ const EditShopifyInfo = ({ open, setOpen, data, onTypeAdded }: Props) => {
             </Grid>
           </Grid>
         </DialogContent>
+
         <DialogActions>
           <Button onClick={handleClose} variant="outlined" color="secondary">
             Cancel

@@ -23,6 +23,8 @@ export interface BusinessDataTypeForAddBusiness {
   business_email: string
   name: string
   logo?: FileList
+  mail_server?: string
+  custom_mail_server?: string
   currency: CurrencyObject
 }
 

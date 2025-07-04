@@ -184,7 +184,7 @@ const ShopifyListTable = ({ tableData }: { tableData?: ShopifyAccount[] }) => {
       console.log("Deleting store with ID:", id)
       const response = await deleteStore(id.toString())
       console.log("Delete response:", response)
-      toast.success("Shopify account deleted successfully")
+      // toast.success("Shopify account deleted successfully")
       setDeleteShopifyOpen(true)
       setIsModalOpen(false)
       setSelectedMenuId(null)
@@ -214,7 +214,7 @@ const ShopifyListTable = ({ tableData }: { tableData?: ShopifyAccount[] }) => {
       // toast.success("Webhook URL copied to clipboard!")
     } catch (err) {
       console.error("Failed to copy webhook URL:", err)
-      toast.error("Failed to copy webhook URL")
+      // toast.error("Failed to copy webhook URL")
     }
   }
 
